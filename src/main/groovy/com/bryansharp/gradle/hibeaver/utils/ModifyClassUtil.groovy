@@ -143,11 +143,7 @@ public class ModifyClassUtil {
                 Log.logEach('* visit *', "Class that implements OnClickListener")
             } else if (instanceOfFragment(superName)) {
                 this.methodMatchMaps = ReWriterAgent.getFragmentReWriter(superName)
-                addMethods = new HashMap<>()
-                addMethods.put(new MethodCell("onResume", "()V"), new MethodCell("onFragmentResume", "(L" + superName + ";)V"));
-                addMethods.put(new MethodCell("onPause", "()V"), new MethodCell("onFragmentPause", "(L" + superName + ";)V"));
-                addMethods.put(new MethodCell("setUserVisibleHint", "(Z)V"), new MethodCell("setFragmentUserVisibleHint", "(Ljava/lang/Object;Z)V"));
-                addMethods.put(new MethodCell("onHiddenChanged", "(Z)V"), new MethodCell("onFragmentHiddenChanged", "(Ljava/lang/Object;Z)V"));
+                addMethods = ReWriterAgent.getFragmentAddMethods()
                 Log.logEach('* visit *', "Class that extends Fragment")
             }
             super.visit(version, access, name, signature, superName, interfaces);
