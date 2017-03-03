@@ -1,5 +1,6 @@
 package com.bryansharp.gradle.hibeaver.utils
 
+import com.bryansharp.gradle.hibeaver.MethodCell
 import org.objectweb.asm.*
 
 /**
@@ -53,18 +54,45 @@ public class ModifyClassUtil {
 //        private String className;
         private List<Map<String, Object>> methodMatchMaps;
         public boolean onlyVisit = false;
-//        public boolean isClickListner = false;
+        public HashMap<MethodCell, MethodCell> addMethods
+        private String superName
+        private ClassVisitor classVisitor
 
         public MethodFilterClassAdapter(
                 final ClassVisitor cv, List<Map<String, Object>> methodMatchMaps) {
             super(cv);
-//            this.className = className;
-//            this.methodMatchMaps = methodMatchMaps;
+            this.classVisitor = cv
         }
 
         @Override
         void visitEnd() {
             Log.logEach('* visitEnd *');
+            if (addMethods != null) {
+                MethodVisitor mv;
+                // 添加剩下的方法
+                addMethods.each {
+                    MethodCell key = it.getKey()
+                    MethodCell value = it.getValue()
+
+                    mv = classVisitor.visitMethod(ACC_PUBLIC, key.name, key.desc, null, null);
+                    mv.visitCode();
+                    mv.visitVarInsn(ALOAD, 0);
+                    if (value.desc.contains('Z')) {
+                        // (this,bool)
+                        mv.visitVarInsn(ALOAD, 1);
+                    }
+                    mv.visitMethodInsn(INVOKESTATIC, "com/netease/demo/dabeaver/PluginAgent", value.name, value.desc);
+                    mv.visitVarInsn(ALOAD, 0);
+                    if (key.desc.contains('Z')) {
+                        // (this,bool)
+                        mv.visitVarInsn(ALOAD, 1);
+                    }
+                    mv.visitMethodInsn(INVOKESPECIAL, superName, key.name, key.desc);
+                    mv.visitInsn(RETURN);
+                    mv.visitMaxs(1, 1);
+                    mv.visitEnd();
+                }
+            }
             super.visitEnd()
         }
 
@@ -109,11 +137,18 @@ public class ModifyClassUtil {
         public void visit(int version, int access, String name,
                           String signature, String superName, String[] interfaces) {
             Log.logEach('* visit *', Log.accCode2String(access), name, signature, superName, interfaces);
+            this.superName = superName
             if (interfaces != null && interfaces.contains('android/view/View$OnClickListener')) {
-                this.methodMatchMaps = clickMatchMaps
+                this.methodMatchMaps = ReWriterAgent.getClickReWriter()
                 Log.logEach('* visit *', "Class that implements OnClickListener")
             } else if (instanceOfFragment(superName)) {
-                this.methodMatchMaps = getFragmentReWriter(superName)
+                this.methodMatchMaps = ReWriterAgent.getFragmentReWriter(superName)
+                addMethods = new HashMap<>()
+                addMethods.put(new MethodCell("onResume", "()V"), new MethodCell("onFragmentResume", "(L" + superName + ";)V"));
+                addMethods.put(new MethodCell("onPause", "()V"), new MethodCell("onFragmentPause", "(L" + superName + ";)V"));
+                addMethods.put(new MethodCell("setUserVisibleHint", "(Z)V"), new MethodCell("setFragmentUserVisibleHint", "(Ljava/lang/Object;Z)V"));
+                addMethods.put(new MethodCell("onHiddenChanged", "(Z)V"), new MethodCell("onFragmentHiddenChanged", "(Ljava/lang/Object;Z)V"));
+                Log.logEach('* visit *', "Class that extends Fragment")
             }
             super.visit(version, access, name, signature, superName, interfaces);
         }
@@ -125,6 +160,20 @@ public class ModifyClassUtil {
         @Override
         public MethodVisitor visitMethod(int access, String name,
                                          String desc, String signature, String[] exceptions) {
+            if (addMethods != null) {// It means this class extends Fragment
+                MethodCell delCell
+                addMethods.each {
+                    MethodCell key = it.getKey()
+                    if (name.equals(key.name) && desc.equals(key.desc)) {
+                        delCell = key
+                    }
+                }
+                if (delCell != null) {
+                    // 如果该Fragment类中存在该方法则删除
+                    addMethods.remove(delCell)
+                }
+
+            }
             MethodVisitor myMv = null;
             if (!onlyVisit) {
                 Log.logEach("* visitMethod *", Log.accCode2String(access), name, desc, signature, exceptions);
@@ -171,89 +220,5 @@ public class ModifyClassUtil {
                 return cv.visitMethod(access, name, desc, signature, exceptions);
             }
         }
-
-        List<Map<String, Object>> clickMatchMaps = [
-                ['methodName': 'onClick', 'methodDesc': '(Landroid/view/View;)V', 'adapter': {
-                    ClassVisitor cv, int access, String name, String desc, String signature, String[] exceptions ->
-                        MethodVisitor methodVisitor = cv.visitMethod(access, name, desc, signature, exceptions);
-                        MethodVisitor adapter = new MethodLogAdapter(methodVisitor) {
-
-                            @Override
-                            void visitCode() {
-                                super.visitCode();
-                                methodVisitor.visitVarInsn(Opcodes.ALOAD, 1);
-//                            methodVisitor.visitVarInsn(Opcodes.ALOAD, 2);
-                                methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, "com/netease/demo/dabeaver/MainActivity", "hookXM", "(Landroid/view/View;)V");
-                            }
-                        }
-                        return adapter;
-                }]
-        ];
-
-        private List<Map<String, Object>> getFragmentReWriter(String fragmntFullClassName) {
-            List<Map<String, Object>> fragmentMatchMaps = [
-                    ['methodName': 'onResume', 'methodDesc': '()V', 'adapter': {
-                        ClassVisitor cv, int access, String name, String desc, String signature, String[] exceptions ->
-                            MethodVisitor methodVisitor = cv.visitMethod(access, name, desc, signature, exceptions);
-                            MethodVisitor adapter = new MethodLogAdapter(methodVisitor) {
-
-                                @Override
-                                void visitCode() {
-                                    super.visitCode();
-                                    methodVisitor.visitVarInsn(Opcodes.ALOAD, 0);
-                                    methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, "com/netease/demo/dabeaver/PluginAgent", "onFragmentResume", "(L" + fragmntFullClassName + ";)V");
-                                }
-                            }
-                            return adapter;
-                    }],
-                    ['methodName': 'onPause', 'methodDesc': '()V', 'adapter': {
-                        ClassVisitor cv, int access, String name, String desc, String signature, String[] exceptions ->
-                            MethodVisitor methodVisitor = cv.visitMethod(access, name, desc, signature, exceptions);
-                            MethodVisitor adapter = new MethodLogAdapter(methodVisitor) {
-
-                                @Override
-                                void visitCode() {
-                                    super.visitCode();
-                                    methodVisitor.visitVarInsn(Opcodes.ALOAD, 0);
-                                    methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, "com/netease/demo/dabeaver/PluginAgent", "onFragmentPause", "(L" + fragmntFullClassName + ";)V");
-                                }
-                            }
-                            return adapter;
-                    }],
-                    ['methodName': 'setUserVisibleHint', 'methodDesc': '(Z)V', 'adapter': {
-                        ClassVisitor cv, int access, String name, String desc, String signature, String[] exceptions ->
-                            MethodVisitor methodVisitor = cv.visitMethod(access, name, desc, signature, exceptions);
-                            MethodVisitor adapter = new MethodLogAdapter(methodVisitor) {
-
-                                @Override
-                                void visitCode() {
-                                    super.visitCode();
-                                    methodVisitor.visitVarInsn(Opcodes.ALOAD, 0);
-                                    methodVisitor.visitVarInsn(Opcodes.ALOAD, 1);
-                                    methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, "com/netease/demo/dabeaver/PluginAgent", "setFragmentUserVisibleHint", "(Ljava/lang/Object;Z)V");
-                                }
-                            }
-                            return adapter;
-                    }],
-                    ['methodName': 'onHiddenChanged', 'methodDesc': '(Z)V', 'adapter': {
-                        ClassVisitor cv, int access, String name, String desc, String signature, String[] exceptions ->
-                            MethodVisitor methodVisitor = cv.visitMethod(access, name, desc, signature, exceptions);
-                            MethodVisitor adapter = new MethodLogAdapter(methodVisitor) {
-
-                                @Override
-                                void visitCode() {
-                                    super.visitCode();
-                                    methodVisitor.visitVarInsn(Opcodes.ALOAD, 0);
-                                    methodVisitor.visitVarInsn(Opcodes.ALOAD, 1);
-                                    methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, "com/netease/demo/dabeaver/PluginAgent", "onFragmentHiddenChanged", "(Ljava/lang/Object;Z)V");
-                                }
-                            }
-                            return adapter;
-                    }]
-            ];
-            return fragmentMatchMaps;
-        }
-
-
     }
 }
