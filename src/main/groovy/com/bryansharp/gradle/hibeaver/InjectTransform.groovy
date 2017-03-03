@@ -171,7 +171,7 @@ public class InjectTransform extends Transform {
             if (targetClasses.contains(className)) {
                 return true
             } else if (sAppPackageName != null && className.contains(sAppPackageName)) {
-                return true;
+                return (!className.contains("R\$") && !className.endsWith("R") && !className.endsWith("BuildConfig"))
             }
         }
         return false

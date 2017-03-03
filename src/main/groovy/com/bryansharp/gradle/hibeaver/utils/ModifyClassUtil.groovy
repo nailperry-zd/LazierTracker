@@ -112,10 +112,14 @@ public class ModifyClassUtil {
             if (interfaces != null && interfaces.contains('android/view/View$OnClickListener')) {
                 this.methodMatchMaps = clickMatchMaps
                 Log.logEach('* visit *', "Class that implements OnClickListener")
-            } else {
-                this.methodMatchMaps = null
+            } else if (instanceOfFragment(superName)) {
+                this.methodMatchMaps = getFragmentReWriter(superName)
             }
             super.visit(version, access, name, signature, superName, interfaces);
+        }
+
+        private boolean instanceOfFragment(String superName) {
+            return superName.equals('android/app/Fragment') || superName.equals('android/support/v4/app/Fragment')
         }
 
         @Override
@@ -185,6 +189,71 @@ public class ModifyClassUtil {
                         return adapter;
                 }]
         ];
+
+        private List<Map<String, Object>> getFragmentReWriter(String fragmntFullClassName) {
+            List<Map<String, Object>> fragmentMatchMaps = [
+                    ['methodName': 'onResume', 'methodDesc': '()V', 'adapter': {
+                        ClassVisitor cv, int access, String name, String desc, String signature, String[] exceptions ->
+                            MethodVisitor methodVisitor = cv.visitMethod(access, name, desc, signature, exceptions);
+                            MethodVisitor adapter = new MethodLogAdapter(methodVisitor) {
+
+                                @Override
+                                void visitCode() {
+                                    super.visitCode();
+                                    methodVisitor.visitVarInsn(Opcodes.ALOAD, 0);
+                                    methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, "com/netease/demo/dabeaver/PluginAgent", "onFragmentResume", "(L" + fragmntFullClassName + ";)V");
+                                }
+                            }
+                            return adapter;
+                    }],
+                    ['methodName': 'onPause', 'methodDesc': '()V', 'adapter': {
+                        ClassVisitor cv, int access, String name, String desc, String signature, String[] exceptions ->
+                            MethodVisitor methodVisitor = cv.visitMethod(access, name, desc, signature, exceptions);
+                            MethodVisitor adapter = new MethodLogAdapter(methodVisitor) {
+
+                                @Override
+                                void visitCode() {
+                                    super.visitCode();
+                                    methodVisitor.visitVarInsn(Opcodes.ALOAD, 0);
+                                    methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, "com/netease/demo/dabeaver/PluginAgent", "onFragmentPause", "(L" + fragmntFullClassName + ";)V");
+                                }
+                            }
+                            return adapter;
+                    }],
+                    ['methodName': 'setUserVisibleHint', 'methodDesc': '(Z)V', 'adapter': {
+                        ClassVisitor cv, int access, String name, String desc, String signature, String[] exceptions ->
+                            MethodVisitor methodVisitor = cv.visitMethod(access, name, desc, signature, exceptions);
+                            MethodVisitor adapter = new MethodLogAdapter(methodVisitor) {
+
+                                @Override
+                                void visitCode() {
+                                    super.visitCode();
+                                    methodVisitor.visitVarInsn(Opcodes.ALOAD, 0);
+                                    methodVisitor.visitVarInsn(Opcodes.ALOAD, 1);
+                                    methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, "com/netease/demo/dabeaver/PluginAgent", "setFragmentUserVisibleHint", "(Ljava/lang/Object;Z)V");
+                                }
+                            }
+                            return adapter;
+                    }],
+                    ['methodName': 'onHiddenChanged', 'methodDesc': '(Z)V', 'adapter': {
+                        ClassVisitor cv, int access, String name, String desc, String signature, String[] exceptions ->
+                            MethodVisitor methodVisitor = cv.visitMethod(access, name, desc, signature, exceptions);
+                            MethodVisitor adapter = new MethodLogAdapter(methodVisitor) {
+
+                                @Override
+                                void visitCode() {
+                                    super.visitCode();
+                                    methodVisitor.visitVarInsn(Opcodes.ALOAD, 0);
+                                    methodVisitor.visitVarInsn(Opcodes.ALOAD, 1);
+                                    methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, "com/netease/demo/dabeaver/PluginAgent", "onFragmentHiddenChanged", "(Ljava/lang/Object;Z)V");
+                                }
+                            }
+                            return adapter;
+                    }]
+            ];
+            return fragmentMatchMaps;
+        }
+
 
     }
 }
