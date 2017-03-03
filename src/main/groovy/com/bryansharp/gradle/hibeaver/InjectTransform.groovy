@@ -30,6 +30,7 @@ public class InjectTransform extends Transform {
     static AppExtension android
     static HashSet<String> targetClasses = [];
     private static Project project;
+    private static String sAppPackageName;
 
     public InjectTransform(Project project) {
         InjectTransform.project = project
@@ -64,6 +65,7 @@ public class InjectTransform extends Transform {
             boolean isIncremental) throws IOException, TransformException, InterruptedException {
         Log.info "==============hiBeaver ${project.hiBeaver.hiBeaverModifyName + ' '}transform enter=============="
         android = project.extensions.getByType(AppExtension)
+        sAppPackageName = getAppPackageName()
 //        String flavorAndBuildType = context.name.split("For")[1]
 //        Log.info("flavorAndBuildType ${flavorAndBuildType}")
         targetClasses = [];
@@ -166,10 +168,14 @@ public class InjectTransform extends Transform {
 
     static boolean shouldModifyClass(String className) {
         if (project.hiBeaver.enableModify) {
-            return targetClasses.contains(className)
-        } else {
-            return false;
+            if (targetClasses.contains(className)) {
+                return true
+            } else if (sAppPackageName != null && className.contains(sAppPackageName)) {
+                return true;
+            }
         }
+        return false
+//        return true
     }
 
     /**
@@ -286,5 +292,19 @@ public class InjectTransform extends Transform {
         while ((read = inputStream.read(buffer)) != -1) {
             out.write(buffer, 0, read);
         }
+    }
+
+    private static String getAppPackageName() {
+        String packageName
+        try {
+            String manifestPath = project.projectDir.absolutePath + File.separator + 'src' + File.separator + 'main' + File.separator + 'AndroidManifest.xml'
+            File manifestFile = new File(manifestPath)
+            def manifest = new XmlParser().parse(manifestFile)
+            packageName = manifest.attribute("package")
+            Log.info("XmlParser packageName: " + packageName)
+        } catch (Exception e) {
+            Log.info("XmlParser Exception: " + e.getMessage())
+        }
+        return packageName
     }
 }
