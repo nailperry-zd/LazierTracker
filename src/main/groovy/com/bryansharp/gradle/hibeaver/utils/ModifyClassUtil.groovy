@@ -53,13 +53,13 @@ public class ModifyClassUtil {
 //        private String className;
         private List<Map<String, Object>> methodMatchMaps;
         public boolean onlyVisit = false;
-        public boolean isClickListner = false;
+//        public boolean isClickListner = false;
 
         public MethodFilterClassAdapter(
                 final ClassVisitor cv, List<Map<String, Object>> methodMatchMaps) {
             super(cv);
 //            this.className = className;
-            this.methodMatchMaps = methodMatchMaps;
+//            this.methodMatchMaps = methodMatchMaps;
         }
 
         @Override
@@ -110,9 +110,11 @@ public class ModifyClassUtil {
                           String signature, String superName, String[] interfaces) {
             Log.logEach('* visit *', Log.accCode2String(access), name, signature, superName, interfaces);
             if (interfaces != null && interfaces.contains('android/view/View$OnClickListener')) {
-                isClickListner = true
+                this.methodMatchMaps = clickMatchMaps
+                Log.logEach('* visit *', "Class that implements OnClickListener")
+            } else {
+                this.methodMatchMaps = null
             }
-            Log.logEach('* visit *', "@isClickListner = " + isClickListner)
             super.visit(version, access, name, signature, superName, interfaces);
         }
 
@@ -123,38 +125,38 @@ public class ModifyClassUtil {
             if (!onlyVisit) {
                 Log.logEach("* visitMethod *", Log.accCode2String(access), name, desc, signature, exceptions);
             }
-            methodMatchMaps.each {
-                Map<String, Object> map ->
-                    String metName = map.get('methodName');
-                    String methodDesc = map.get('methodDesc');
-                    if (name.equals(metName)) {
-                        Closure visit = map.get('adapter');
-                        if (visit != null) {
-                            if (methodDesc != null) {
-                                if (methodDesc.equals(desc)) {
-                                    if (onlyVisit) {
-                                        myMv = new MethodLogAdapter(cv.visitMethod(access, name, desc, signature, exceptions));
-                                    } else {
-                                        try {
-                                            if(isClickListner){
+            if (methodMatchMaps != null) {
+                methodMatchMaps.each {
+                    Map<String, Object> map ->
+                        String metName = map.get('methodName');
+                        String methodDesc = map.get('methodDesc');
+                        if (name.equals(metName)) {
+                            Closure visit = map.get('adapter');
+                            if (visit != null) {
+                                if (methodDesc != null) {
+                                    if (methodDesc.equals(desc)) {
+                                        if (onlyVisit) {
+                                            myMv = new MethodLogAdapter(cv.visitMethod(access, name, desc, signature, exceptions));
+                                        } else {
+                                            try {
                                                 myMv = visit(cv, access, name, desc, signature, exceptions);
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                                myMv = null
                                             }
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
-                                            myMv = null
                                         }
                                     }
-                                }
-                            } else {
-                                try {
-                                    myMv = visit(cv, access, name, desc, signature, exceptions);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                    myMv = null
+                                } else {
+                                    try {
+                                        myMv = visit(cv, access, name, desc, signature, exceptions);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                        myMv = null
+                                    }
                                 }
                             }
                         }
-                    }
+                }
             }
             if (myMv != null) {
                 if (onlyVisit) {
@@ -166,6 +168,23 @@ public class ModifyClassUtil {
             }
         }
 
-    }
+        List<Map<String, Object>> clickMatchMaps = [
+                ['methodName': 'onClick', 'methodDesc': '(Landroid/view/View;)V', 'adapter': {
+                    ClassVisitor cv, int access, String name, String desc, String signature, String[] exceptions ->
+                        MethodVisitor methodVisitor = cv.visitMethod(access, name, desc, signature, exceptions);
+                        MethodVisitor adapter = new MethodLogAdapter(methodVisitor) {
 
+                            @Override
+                            void visitCode() {
+                                super.visitCode();
+                                methodVisitor.visitVarInsn(Opcodes.ALOAD, 1);
+//                            methodVisitor.visitVarInsn(Opcodes.ALOAD, 2);
+                                methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, "com/netease/demo/dabeaver/MainActivity", "hookXM", "(Landroid/view/View;)V");
+                            }
+                        }
+                        return adapter;
+                }]
+        ];
+
+    }
 }
