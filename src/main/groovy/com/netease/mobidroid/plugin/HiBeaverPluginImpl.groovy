@@ -1,8 +1,8 @@
-package com.bryansharp.gradle.hibeaver
+package com.netease.mobidroid.plugin
 
 import com.android.build.gradle.BaseExtension
-import com.bryansharp.gradle.hibeaver.utils.DataHelper
-import com.bryansharp.gradle.hibeaver.utils.Log
+import com.netease.mobidroid.plugin.utils.DataHelper
+import com.netease.mobidroid.plugin.utils.Log
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 

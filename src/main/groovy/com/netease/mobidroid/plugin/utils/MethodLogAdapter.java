@@ -1,4 +1,6 @@
-package com.bryansharp.gradle.hibeaver.utils;
+package com.netease.mobidroid.plugin.utils;
+
+import com.netease.mobidroid.plugin.utils.Log;
 
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.Label;

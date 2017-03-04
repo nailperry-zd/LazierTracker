@@ -1,4 +1,4 @@
-package com.bryansharp.gradle.hibeaver.utils
+package com.netease.mobidroid.plugin.utils
 
 import org.apache.commons.io.IOUtils
 

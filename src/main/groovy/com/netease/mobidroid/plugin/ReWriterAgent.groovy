@@ -1,6 +1,6 @@
-package com.bryansharp.gradle.hibeaver
+package com.netease.mobidroid.plugin
 
-import com.bryansharp.gradle.hibeaver.utils.MethodLogAdapter;
+import com.netease.mobidroid.plugin.utils.MethodLogAdapter;
 import org.objectweb.asm.*
 
 

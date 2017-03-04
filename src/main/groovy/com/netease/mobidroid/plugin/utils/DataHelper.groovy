@@ -1,4 +1,4 @@
-package com.bryansharp.gradle.hibeaver.utils
+package com.netease.mobidroid.plugin.utils
 
 public class DataHelper {
     static Map getExt() {

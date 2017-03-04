@@ -1,7 +1,7 @@
-package com.bryansharp.gradle.hibeaver.utils
+package com.netease.mobidroid.plugin.utils
 
-import com.bryansharp.gradle.hibeaver.MethodCell
-import com.bryansharp.gradle.hibeaver.ReWriterAgent
+import com.netease.mobidroid.plugin.MethodCell
+import com.netease.mobidroid.plugin.ReWriterAgent
 import org.objectweb.asm.*
 
 /**

@@ -1,13 +1,13 @@
-package com.bryansharp.gradle.hibeaver
+package com.netease.mobidroid.plugin
 
 import com.android.annotations.NonNull
 import com.android.annotations.Nullable
 import com.android.build.api.transform.*
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.internal.pipeline.TransformManager
-import com.bryansharp.gradle.hibeaver.utils.DataHelper
-import com.bryansharp.gradle.hibeaver.utils.Log
-import com.bryansharp.gradle.hibeaver.utils.ModifyClassUtil
+import com.netease.mobidroid.plugin.utils.DataHelper
+import com.netease.mobidroid.plugin.utils.Log
+import com.netease.mobidroid.plugin.utils.ModifyClassUtil
 import groovy.io.FileType
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.FileUtils

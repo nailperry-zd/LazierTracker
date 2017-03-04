@@ -1,4 +1,4 @@
-package com.bryansharp.gradle.hibeaver
+package com.netease.mobidroid.plugin
 
 public class MethodCell{
     String name

@@ -1,6 +1,6 @@
-package com.bryansharp.gradle.hibeaver
+package com.netease.mobidroid.plugin
 
-import com.bryansharp.gradle.hibeaver.utils.Log
+import com.netease.mobidroid.plugin.utils.Log
 import org.gradle.BuildListener
 import org.gradle.BuildResult
 import org.gradle.api.Task
