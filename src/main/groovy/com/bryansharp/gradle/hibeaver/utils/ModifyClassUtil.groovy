@@ -1,6 +1,7 @@
 package com.bryansharp.gradle.hibeaver.utils
 
 import com.bryansharp.gradle.hibeaver.MethodCell
+import com.bryansharp.gradle.hibeaver.ReWriterAgent
 import org.objectweb.asm.*
 
 /**
@@ -69,7 +70,7 @@ public class ModifyClassUtil {
             Log.logEach('* visitEnd *');
             if (addMethods != null) {
                 MethodVisitor mv;
-                // 添加剩下的方法
+                // 添加剩下的方法，确保super.onHiddenChanged(hidden);等先被调用
                 addMethods.each {
                     MethodCell key = it.getKey()
                     MethodCell value = it.getValue()
@@ -77,17 +78,17 @@ public class ModifyClassUtil {
                     mv = classVisitor.visitMethod(ACC_PUBLIC, key.name, key.desc, null, null);
                     mv.visitCode();
                     mv.visitVarInsn(ALOAD, 0);
-                    if (value.desc.contains('Z')) {
-                        // (this,bool)
-                        mv.visitVarInsn(ALOAD, 1);
-                    }
-                    mv.visitMethodInsn(INVOKESTATIC, "com/netease/demo/dabeaver/PluginAgent", value.name, value.desc);
-                    mv.visitVarInsn(ALOAD, 0);
                     if (key.desc.contains('Z')) {
                         // (this,bool)
                         mv.visitVarInsn(ALOAD, 1);
                     }
                     mv.visitMethodInsn(INVOKESPECIAL, superName, key.name, key.desc);
+                    mv.visitVarInsn(ALOAD, 0);
+                    if (value.desc.contains('Z')) {
+                        // (this,bool)
+                        mv.visitVarInsn(ALOAD, 1);
+                    }
+                    mv.visitMethodInsn(INVOKESTATIC, ReWriterAgent.sAgentClassName, value.name, value.desc);
                     mv.visitInsn(RETURN);
                     mv.visitMaxs(1, 1);
                     mv.visitEnd();
