@@ -38,7 +38,7 @@ public class InjectTransform extends Transform {
 
     @Override
     String getName() {
-        return "HiBeaver"
+        return "Hubble"
     }
 
     @Override
@@ -63,7 +63,7 @@ public class InjectTransform extends Transform {
             @NonNull Collection<TransformInput> referencedInputs,
             @Nullable TransformOutputProvider outputProvider,
             boolean isIncremental) throws IOException, TransformException, InterruptedException {
-        Log.info "==============hiBeaver ${project.hubbleConfig.hiBeaverModifyName + ' '}transform enter=============="
+        Log.info "==============Hubble ${project.hubbleConfig.hiBeaverModifyName + ' '}transform enter=============="
         android = project.extensions.getByType(AppExtension)
         sAppPackageName = getAppPackageName()
 //        String flavorAndBuildType = context.name.split("For")[1]
@@ -158,7 +158,7 @@ public class InjectTransform extends Transform {
     }
 
     private static void saveModifiedJarForCheck(File optJar) {
-        File dir = DataHelper.ext.hiBeaverDir;
+        File dir = DataHelper.ext.pluginTmpDir;
         File checkJarFile = new File(dir, optJar.getName());
         if (checkJarFile.exists()) {
             checkJarFile.delete();
@@ -294,6 +294,10 @@ public class InjectTransform extends Transform {
         }
     }
 
+    /**
+     * 获取应用程序包名
+     * @return
+     */
     private static String getAppPackageName() {
         String packageName
         try {

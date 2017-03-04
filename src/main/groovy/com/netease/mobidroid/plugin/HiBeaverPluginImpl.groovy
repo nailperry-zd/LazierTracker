@@ -9,7 +9,7 @@ import org.gradle.api.Project
 class HiBeaverPluginImpl implements Plugin<Project> {
     @Override
     void apply(Project project) {
-        println ":applied HiBeaver"
+        println ":applied Hubble"
         project.extensions.create('hubbleConfig', HiBeaverParams)
         registerTransform(project)
         initDir(project);
@@ -34,10 +34,10 @@ class HiBeaverPluginImpl implements Plugin<Project> {
     }
 
     static void initDir(Project project) {
-        File hiBeaverDir = new File(project.buildDir, "HiBeaver")
-        if (!hiBeaverDir.exists()) {
-            hiBeaverDir.mkdir()
+        File pluginTmpDir = new File(project.buildDir, 'Hubble')
+        if (!pluginTmpDir.exists()) {
+            pluginTmpDir.mkdir()
         }
-        DataHelper.ext.hiBeaverDir = hiBeaverDir
+        DataHelper.ext.pluginTmpDir = pluginTmpDir
     }
 }
