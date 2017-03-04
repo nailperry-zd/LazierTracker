@@ -159,10 +159,14 @@ public class ModifyClassUtil {
                                          String desc, String signature, String[] exceptions) {
             if (addMethods != null) {// It means this class extends Fragment
                 MethodCell delCell
-                addMethods.each {
-                    MethodCell key = it.getKey()
+                // 找到后跳出循环
+                Iterator<MethodCell, MethodCell> iterator = addMethods.iterator()
+                while (iterator.hasNext()) {
+                    Map.Entry<MethodCell, MethodCell> entry = iterator.next()
+                    MethodCell key = entry.getKey()
                     if (name.equals(key.name) && desc.equals(key.desc)) {
                         delCell = key
+                        break
                     }
                 }
                 if (delCell != null) {
@@ -176,36 +180,38 @@ public class ModifyClassUtil {
                 Log.logEach("* visitMethod *", Log.accCode2String(access), name, desc, signature, exceptions);
             }
             if (methodMatchMaps != null) {
-                methodMatchMaps.each {
-                    Map<String, Object> map ->
-                        String metName = map.get('methodName');
-                        String methodDesc = map.get('methodDesc');
-                        if (name.equals(metName)) {
-                            Closure visit = map.get('adapter');
-                            if (visit != null) {
-                                if (methodDesc != null) {
-                                    if (methodDesc.equals(desc)) {
-                                        if (onlyVisit) {
-                                            myMv = new MethodLogAdapter(cv.visitMethod(access, name, desc, signature, exceptions));
-                                        } else {
-                                            try {
-                                                myMv = visit(cv, access, name, desc, signature, exceptions);
-                                            } catch (Exception e) {
-                                                e.printStackTrace();
-                                                myMv = null
-                                            }
+                for (int i = 0; i < methodMatchMaps.size(); i++) {
+                    Map<String, Object> map = methodMatchMaps.get(i)
+                    String metName = map.get('methodName');
+                    String methodDesc = map.get('methodDesc');
+                    if (name.equals(metName)) {
+                        Closure visit = map.get('adapter');
+                        if (visit != null) {
+                            if (methodDesc != null) {
+                                if (methodDesc.equals(desc)) {
+                                    if (onlyVisit) {
+                                        myMv = new MethodLogAdapter(cv.visitMethod(access, name, desc, signature, exceptions));
+                                    } else {
+                                        try {
+                                            myMv = visit(cv, access, name, desc, signature, exceptions);
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                            myMv = null
                                         }
                                     }
-                                } else {
-                                    try {
-                                        myMv = visit(cv, access, name, desc, signature, exceptions);
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                        myMv = null
-                                    }
+                                    // 成功匹配则跳出循环
+                                    break
+                                }
+                            } else {
+                                try {
+                                    myMv = visit(cv, access, name, desc, signature, exceptions);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    myMv = null
                                 }
                             }
                         }
+                    }
                 }
             }
             if (myMv != null) {
