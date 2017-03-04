@@ -15,8 +15,11 @@
 //    //this is a kit feature of the plugin, set it true to see the time consume of this build
 //    watchTimeConsume = false
 //
-//    //this is the most important part, 3rd party JAR packages that want our plugin to inject; our plugin will inject app package and 'butterknife.internal' by default.
-//    //structure is like ['butterknife.internal','com.a.c'], type is HashSet<String>
+//    //this is the most important part, 3rd party JAR packages that want our plugin to inject;
+//    //our plugin will inject package defined in 'AndroidManifest.xml' and 'butterknife.internal.butterknife.internal.DebouncingOnClickListener' by default.
+//    //structure is like ['butterknife.internal','com.a.c'], type is HashSet<String>.
+//    //You can also specify the name of the class;
+//    //example: ['com.netease.hearttouch.BaseFragment']
 //    targetPackages = []
 //}
 //

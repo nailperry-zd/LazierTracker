@@ -23,7 +23,7 @@ uploadArchives{
         pom.project{
             groupId "com.netease.mobidroid"
             artifactId "hubbledata-gradle-plugin"
-            version "0.0.3"
+            version "0.0.4"
         }
     }
 }
