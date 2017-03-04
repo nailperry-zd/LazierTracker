@@ -6,11 +6,11 @@ import com.netease.mobidroid.plugin.utils.Log
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
-class HiBeaverPluginImpl implements Plugin<Project> {
+class HubblePluginImpl implements Plugin<Project> {
     @Override
     void apply(Project project) {
         println ":applied Hubble"
-        project.extensions.create('hubbleConfig', HiBeaverParams)
+        project.extensions.create('hubbleConfig', HubblePluginParams)
         registerTransform(project)
         initDir(project);
         project.afterEvaluate {

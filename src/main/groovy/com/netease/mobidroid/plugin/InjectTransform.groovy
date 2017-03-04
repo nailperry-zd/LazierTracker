@@ -63,7 +63,7 @@ public class InjectTransform extends Transform {
             @NonNull Collection<TransformInput> referencedInputs,
             @Nullable TransformOutputProvider outputProvider,
             boolean isIncremental) throws IOException, TransformException, InterruptedException {
-        Log.info "==============Hubble ${project.hubbleConfig.hiBeaverModifyName + ' '}transform enter=============="
+        Log.info "==============${project.hubbleConfig.pluginName + ' '}transform enter=============="
         android = project.extensions.getByType(AppExtension)
         sAppPackageName = getAppPackageName()
 //        String flavorAndBuildType = context.name.split("For")[1]

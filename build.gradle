@@ -21,8 +21,8 @@ uploadArchives{
         def deployPath = file('/Users/zhangdan/Desktop/Gradle_Plugin_Repo')
         repository(url:"file://${deployPath.absolutePath}")
         pom.project{
-            groupId "com.github.BryanSharp"
-            artifactId "hibeaver"
+            groupId "com.netease.mobidroid.plugin"
+            artifactId "hubbledata-gradle"
             version "1.2.4"
         }
     }
