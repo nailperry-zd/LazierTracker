@@ -10,14 +10,14 @@ class HiBeaverPluginImpl implements Plugin<Project> {
     @Override
     void apply(Project project) {
         println ":applied HiBeaver"
-        project.extensions.create('hiBeaver', HiBeaverParams)
+        project.extensions.create('hubbleConfig', HiBeaverParams)
         registerTransform(project)
         initDir(project);
         project.afterEvaluate {
-            Log.setQuiet(project.hiBeaver.keepQuiet);
-            Log.setShowHelp(project.hiBeaver.showHelp);
+            Log.setQuiet(project.hubbleConfig.keepQuiet);
+            Log.setShowHelp(project.hubbleConfig.showHelp);
             Log.logHelp();
-            if (project.hiBeaver.watchTimeConsume) {
+            if (project.hubbleConfig.watchTimeConsume) {
                 Log.info "watchTimeConsume enabled"
                 project.gradle.addListener(new TimeListener())
             } else {

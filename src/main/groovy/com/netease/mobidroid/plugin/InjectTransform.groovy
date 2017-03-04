@@ -63,13 +63,13 @@ public class InjectTransform extends Transform {
             @NonNull Collection<TransformInput> referencedInputs,
             @Nullable TransformOutputProvider outputProvider,
             boolean isIncremental) throws IOException, TransformException, InterruptedException {
-        Log.info "==============hiBeaver ${project.hiBeaver.hiBeaverModifyName + ' '}transform enter=============="
+        Log.info "==============hiBeaver ${project.hubbleConfig.hiBeaverModifyName + ' '}transform enter=============="
         android = project.extensions.getByType(AppExtension)
         sAppPackageName = getAppPackageName()
 //        String flavorAndBuildType = context.name.split("For")[1]
 //        Log.info("flavorAndBuildType ${flavorAndBuildType}")
         targetClasses = [];
-        Map<String, List<Map<String, Object>>> modifyMatchMaps = project.hiBeaver.modifyMatchMaps;
+        Map<String, List<Map<String, Object>>> modifyMatchMaps = project.hubbleConfig.modifyMatchMaps;
         if (modifyMatchMaps != null) {
             targetClasses.addAll(modifyMatchMaps.keySet());
         }
@@ -167,7 +167,7 @@ public class InjectTransform extends Transform {
     }
 
     static boolean shouldModifyClass(String className) {
-        if (project.hiBeaver.enableModify) {
+        if (project.hubbleConfig.enableModify) {
             if (targetClasses.contains(className)) {
                 return true
             } else if (sAppPackageName != null && className.contains(sAppPackageName)) {
@@ -193,7 +193,7 @@ public class InjectTransform extends Transform {
              * 读取原jar
              */
             def file = new JarFile(jarFile);
-            def modifyMatchMaps = project.hiBeaver.modifyMatchMaps
+            def modifyMatchMaps = project.hubbleConfig.modifyMatchMaps
             Enumeration enumeration = file.entries();
             while (enumeration.hasMoreElements()) {
                 JarEntry jarEntry = (JarEntry) enumeration.nextElement();
@@ -237,7 +237,7 @@ public class InjectTransform extends Transform {
         File modified;
         try {
             String className = path2Classname(classFile.absolutePath.replace(dir.absolutePath + File.separator, ""));
-            def modifyMatchMaps = project.hiBeaver.modifyMatchMaps
+            def modifyMatchMaps = project.hubbleConfig.modifyMatchMaps
             byte[] sourceClassBytes = IOUtils.toByteArray(new FileInputStream(classFile));
             if (shouldModifyClass(className)) {
                 byte[] modifiedClassBytes = ModifyClassUtil.modifyClasses(className, sourceClassBytes, modifyMatchMaps.get(className));
