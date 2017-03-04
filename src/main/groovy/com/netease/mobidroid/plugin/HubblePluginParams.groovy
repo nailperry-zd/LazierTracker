@@ -6,5 +6,5 @@ public class HubblePluginParams {
     boolean watchTimeConsume = false
     boolean keepQuiet = false
     boolean showHelp = true
-    Map<String, List<Map<String, Object>>> modifyMatchMaps = [:]
+    HashSet<String> targetPackages = []
 }

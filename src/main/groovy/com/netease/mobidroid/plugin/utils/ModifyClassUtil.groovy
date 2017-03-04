@@ -14,13 +14,13 @@ import org.objectweb.asm.*
 public class ModifyClassUtil {
 
     public
-    static byte[] modifyClasses(String className, byte[] srcByteCode, List<Map<String, Object>> methodMatchMaps) {
+    static byte[] modifyClasses(String className, byte[] srcByteCode) {
         byte[] classBytesCode = null;
         try {
             Log.info("====start modifying ${className}====");
-            classBytesCode = modifyClass(srcByteCode, methodMatchMaps);
+            classBytesCode = modifyClass(srcByteCode);
             Log.info("====revisit modified ${className}====");
-            onlyVisitClassMethod(classBytesCode, methodMatchMaps);
+            onlyVisitClassMethod(classBytesCode);
             Log.info("====finish modifying ${className}====");
             return classBytesCode;
         } catch (Exception e) {
@@ -34,18 +34,18 @@ public class ModifyClassUtil {
 
 
     private
-    static byte[] modifyClass(byte[] srcClass, List<Map<String, Object>> modifyMatchMaps) throws IOException {
+    static byte[] modifyClass(byte[] srcClass) throws IOException {
         ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-        ClassAdapter adapter = new MethodFilterClassAdapter(classWriter, modifyMatchMaps);
+        ClassAdapter adapter = new MethodFilterClassAdapter(classWriter);
         ClassReader cr = new ClassReader(srcClass);
         cr.accept(adapter, ClassReader.SKIP_DEBUG);
         return classWriter.toByteArray();
     }
 
     private
-    static void onlyVisitClassMethod(byte[] srcClass, List<Map<String, Object>> modifyMatchMaps) throws IOException {
+    static void onlyVisitClassMethod(byte[] srcClass) throws IOException {
         ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-        MethodFilterClassAdapter adapter = new MethodFilterClassAdapter(classWriter, modifyMatchMaps);
+        MethodFilterClassAdapter adapter = new MethodFilterClassAdapter(classWriter);
         adapter.onlyVisit = true;
         ClassReader cr = new ClassReader(srcClass);
         cr.accept(adapter, ClassReader.SKIP_DEBUG);
@@ -60,7 +60,7 @@ public class ModifyClassUtil {
         private ClassVisitor classVisitor
 
         public MethodFilterClassAdapter(
-                final ClassVisitor cv, List<Map<String, Object>> methodMatchMaps) {
+                final ClassVisitor cv) {
             super(cv);
             this.classVisitor = cv
         }

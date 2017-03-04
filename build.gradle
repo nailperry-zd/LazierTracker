@@ -5,7 +5,7 @@ dependencies {
     compile localGroovy()
     compile fileTree(dir: 'libs', include: ['*.jar'])
 //    compile "com.android.tools.build:transform-api:1.5.0"
-    compile 'com.android.tools.build:gradle:2.0.0'
+    compile 'com.android.tools.build:gradle:2.2.2'
     compile "commons-io:commons-io:1.4"
     compile 'asm:asm:3.3.1'
 }
@@ -21,9 +21,9 @@ uploadArchives{
         def deployPath = file('/Users/zhangdan/Desktop/Gradle_Plugin_Repo')
         repository(url:"file://${deployPath.absolutePath}")
         pom.project{
-            groupId "com.netease.mobidroid.plugin"
-            artifactId "hubbledata-gradle"
-            version "1.2.4"
+            groupId "com.netease.mobidroid"
+            artifactId "hubbledata-gradle-plugin"
+            version "0.0.3"
         }
     }
 }

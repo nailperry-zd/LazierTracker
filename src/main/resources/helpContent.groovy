@@ -15,9 +15,9 @@
 //    //this is a kit feature of the plugin, set it true to see the time consume of this build
 //    watchTimeConsume = false
 //
-//    //this is the most important part, 3rd party JAR packages that want our plugin to inject; our plugin will inject app package by default.
-//    //structure is like ['butterknife.internal','com.a.c'], type is String[]
-//    injectedPackages = []
+//    //this is the most important part, 3rd party JAR packages that want our plugin to inject; our plugin will inject app package and 'butterknife.internal' by default.
+//    //structure is like ['butterknife.internal','com.a.c'], type is HashSet<String>
+//    targetPackages = []
 //}
 //
 // Our plugin is on the basis of the open source project HiBeaver(https://github.com/BryanSharp/hibeaver)

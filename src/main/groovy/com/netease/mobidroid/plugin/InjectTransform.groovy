@@ -28,9 +28,9 @@ import java.util.zip.ZipEntry
  */
 public class InjectTransform extends Transform {
     static AppExtension android
-    static HashSet<String> targetClasses = [];
+    // our plugin will inject 'butterknife.internal' by default.
+    static HashSet<String> targetPackages = ['butterknife.internal'];
     private static Project project;
-    private static String sAppPackageName;
 
     public InjectTransform(Project project) {
         InjectTransform.project = project
@@ -65,14 +65,22 @@ public class InjectTransform extends Transform {
             boolean isIncremental) throws IOException, TransformException, InterruptedException {
         Log.info "==============${project.hubbleConfig.pluginName + ' '}transform enter=============="
         android = project.extensions.getByType(AppExtension)
-        sAppPackageName = getAppPackageName()
 //        String flavorAndBuildType = context.name.split("For")[1]
 //        Log.info("flavorAndBuildType ${flavorAndBuildType}")
-        targetClasses = [];
-        Map<String, List<Map<String, Object>>> modifyMatchMaps = project.hubbleConfig.modifyMatchMaps;
-        if (modifyMatchMaps != null) {
-            targetClasses.addAll(modifyMatchMaps.keySet());
+
+        // our plugin will inject app package by default.
+        String appPackageName = getAppPackageName()
+        if (appPackageName != null) {
+            targetPackages.add(appPackageName)
         }
+
+        // 3rd party JAR packages that want our plugin to inject.
+        HashSet<String> inputPackages = project.hubbleConfig.targetPackages
+        if (inputPackages != null) {
+            targetPackages.addAll(inputPackages);
+            Log.info "==============@targetPackages = ${targetPackages}=============="
+        }
+
         /**
          * 获取所有依赖的classPaths
          */
@@ -166,16 +174,23 @@ public class InjectTransform extends Transform {
         FileUtils.copyFile(optJar, checkJarFile);
     }
 
+    /**
+     * 只扫描特定包下的类
+     * @param className 形如 android.app.Fragment 的类名
+     * @return
+     */
     static boolean shouldModifyClass(String className) {
-        if (project.hubbleConfig.enableModify) {
-            if (targetClasses.contains(className)) {
-                return true
-            } else if (sAppPackageName != null && className.contains(sAppPackageName)) {
-                return (!className.contains("R\$") && !className.endsWith("R") && !className.endsWith("BuildConfig"))
+        if (project.hubbleConfig.enableModify && targetPackages != null) {
+            Iterator<String> iterator = targetPackages.iterator()
+            // 注意，闭包里的return语句相当于continue，不会跳出遍历，故用while或for
+            while (iterator.hasNext()) {
+                String packagename = iterator.next()
+                if (className.contains(packagename)) {
+                    return (!className.contains("R\$") && !className.endsWith("R") && !className.endsWith("BuildConfig"))
+                }
             }
         }
         return false
-//        return true
     }
 
     /**
@@ -193,7 +208,6 @@ public class InjectTransform extends Transform {
              * 读取原jar
              */
             def file = new JarFile(jarFile);
-            def modifyMatchMaps = project.hubbleConfig.modifyMatchMaps
             Enumeration enumeration = file.entries();
             while (enumeration.hasMoreElements()) {
                 JarEntry jarEntry = (JarEntry) enumeration.nextElement();
@@ -210,8 +224,8 @@ public class InjectTransform extends Transform {
                 byte[] sourceClassBytes = IOUtils.toByteArray(inputStream);
                 if (entryName.endsWith(".class")) {
                     className = path2Classname(entryName)
-                    if (modifyMatchMaps != null && shouldModifyClass(className)) {
-                        modifiedClassBytes = ModifyClassUtil.modifyClasses(className, sourceClassBytes, modifyMatchMaps.get(className));
+                    if (shouldModifyClass(className)) {
+                        modifiedClassBytes = ModifyClassUtil.modifyClasses(className, sourceClassBytes);
                     }
                 }
                 if (modifiedClassBytes == null) {
@@ -221,7 +235,7 @@ public class InjectTransform extends Transform {
                 }
                 jarOutputStream.closeEntry();
             }
-//            Log.info("${hexName} is modified");
+            Log.info("${hexName} is modified");
             jarOutputStream.close();
             file.close();
             return optJar;
@@ -237,10 +251,9 @@ public class InjectTransform extends Transform {
         File modified;
         try {
             String className = path2Classname(classFile.absolutePath.replace(dir.absolutePath + File.separator, ""));
-            def modifyMatchMaps = project.hubbleConfig.modifyMatchMaps
             byte[] sourceClassBytes = IOUtils.toByteArray(new FileInputStream(classFile));
             if (shouldModifyClass(className)) {
-                byte[] modifiedClassBytes = ModifyClassUtil.modifyClasses(className, sourceClassBytes, modifyMatchMaps.get(className));
+                byte[] modifiedClassBytes = ModifyClassUtil.modifyClasses(className, sourceClassBytes);
                 if (modifiedClassBytes) {
                     modified = new File(tempDir, className.replace('.', '') + '.class')
                     if (modified.exists()) {
@@ -262,7 +275,7 @@ public class InjectTransform extends Transform {
      */
     public static boolean isJarNeedModify(File jarFile) {
         boolean modified = false;
-        if (targetClasses != null && targetClasses.size() > 0) {
+        if (targetPackages != null && targetPackages.size() > 0) {
             if (jarFile) {
                 /**
                  * 读取原jar
@@ -277,6 +290,7 @@ public class InjectTransform extends Transform {
                         className = entryName.replace("/", ".").replace(".class", "")
                         if (shouldModifyClass(className)) {
                             modified = true;
+                            break;
                         }
                     }
                 }
