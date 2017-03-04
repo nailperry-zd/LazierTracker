@@ -297,10 +297,9 @@ public class InjectTransform extends Transform {
     private static String getAppPackageName() {
         String packageName
         try {
-            String manifestPath = project.projectDir.absolutePath + File.separator + 'src' + File.separator + 'main' + File.separator + 'AndroidManifest.xml'
-            File manifestFile = new File(manifestPath)
-            def manifest = new XmlParser().parse(manifestFile)
-            packageName = manifest.attribute("package")
+            def manifestFile = android.sourceSets.main.manifest.srcFile
+            Log.info("XmlParser manifestFile: " + manifestFile)
+            packageName = new XmlParser().parse(manifestFile).attribute('package')
             Log.info("XmlParser packageName: " + packageName)
         } catch (Exception e) {
             Log.info("XmlParser Exception: " + e.getMessage())
