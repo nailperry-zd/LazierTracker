@@ -204,10 +204,6 @@ public class ModifyClassUtil {
                                             // (this,bool)
                                             methodVisitor.visitVarInsn(Opcodes.ALOAD, 1);
                                         }
-                                        /*for (def i = methodCell.paramsStart; i < methodCell.paramsStart + methodCell.paramsCount; i++) {
-                                            // Todo: 这里直接传入i居然报错：at stack depth 0, expected type java.lang.Object but found int；强制转换成Object才行。why?
-                                            methodVisitor.visitVarInsn(Opcodes.ALOAD, i);
-                                        }*/
                                         methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, ReWriterConfig.sAgentClassName, methodCell.agentName, methodCell.agentDesc, false);
                                     }
                                     super.visitInsn(opcode);
