@@ -2,17 +2,18 @@ package com.netease.mobidroid.plugin.utils;
 
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodAdapter;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 
 /**
  * Created by bryansharp on 17/2/15.
+ * Modified by nailperry on 17/3/5.
  */
 
-public class MethodLogAdapter extends MethodAdapter {
+public class MethodLogVisitor extends MethodVisitor {
 
-    public MethodLogAdapter(MethodVisitor mv) {
-        super(mv);
+    public MethodLogVisitor(MethodVisitor mv) {
+        super(Opcodes.ASM5, mv);
     }
 
     /**
@@ -26,9 +27,9 @@ public class MethodLogAdapter extends MethodAdapter {
     }
 
     @Override
-    public void visitMethodInsn(int opcode, String owner, String name, String desc) {
-        Log.logEach("visitMethodInsn", Log.getOpName(opcode), owner, name, desc);
-        super.visitMethodInsn(opcode, owner, name, desc);
+    public void visitMethodInsn(int opcode, String owner, String name, String desc, boolean itf) {
+        Log.logEach("visitMethodInsn", Log.getOpName(opcode), owner, name, desc, itf);
+        super.visitMethodInsn(opcode, owner, name, desc,itf);
     }
 
     @Override

@@ -30,14 +30,12 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="gradle-2.2.2" level="project" />
-    <orderEntry type="library" exported="" name="asm-3.3.1" level="project" />
     <orderEntry type="library" exported="" name="gradle-core-2.2.2" level="project" />
     <orderEntry type="library" exported="" name="builder-2.2.2" level="project" />
     <orderEntry type="library" exported="" name="lint-25.2.2" level="project" />
     <orderEntry type="library" exported="" name="transform-api-2.0.0-deprecated-use-gradle-api" level="project" />
     <orderEntry type="library" exported="" name="gradle-api-2.2.2" level="project" />
     <orderEntry type="library" exported="" name="compilerCommon-2.2.2" level="project" />
-    <orderEntry type="library" exported="" name="asm-5.0.4" level="project" />
     <orderEntry type="library" exported="" name="asm-commons-5.0.4" level="project" />
     <orderEntry type="library" exported="" name="proguard-gradle-5.2.1" level="project" />
     <orderEntry type="library" exported="" name="org.jacoco.core-0.7.5.201505241946" level="project" />
@@ -84,6 +82,7 @@
     <orderEntry type="library" exported="" name="commons-codec-1.4" level="project" />
     <orderEntry type="library" exported="" name="lombok-ast-0.2.3" level="project" />
     <orderEntry type="library" exported="" name="uast-145.597.3" level="project" />
+    <orderEntry type="library" exported="" name="asm-5.0.4" level="project" />
     <orderEntry type="library" exported="" name="commons-io-2.4" level="project" />
     <orderEntry type="library" exported="" name="annotations-25.2.2" level="project" />
     <orderEntry type="library" exported="" name="guava-18.0" level="project" />

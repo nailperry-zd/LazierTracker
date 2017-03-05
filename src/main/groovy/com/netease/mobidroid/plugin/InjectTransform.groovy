@@ -21,10 +21,7 @@ import java.util.zip.ZipEntry
 
 /**
  * Created by bryansharp(bsp0911932@163.com) on 2016/5/7.
- *
- * @author bryansharp
- *         Project: FirstGradle
- *         introduction:
+ * Modified by nailperry on 2017/3/2.
  */
 public class InjectTransform extends Transform {
     static AppExtension android

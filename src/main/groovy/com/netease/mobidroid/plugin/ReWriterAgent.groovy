@@ -1,6 +1,6 @@
 package com.netease.mobidroid.plugin
 
-import com.netease.mobidroid.plugin.utils.MethodLogAdapter;
+import com.netease.mobidroid.plugin.utils.MethodLogVisitor;
 import org.objectweb.asm.*
 
 
@@ -22,19 +22,19 @@ public class ReWriterAgent {
     }
 
     private static List<Map<String, Object>> sClickMatchMaps = [
-            ['methodName': 'onClick', 'methodDesc': '(Landroid/view/View;)V', 'adapter': {
+            ['methodName': 'onClick', 'methodDesc': '(Landroid/view/View;)V', 'methodVisitor': {
                 ClassVisitor cv, int access, String name, String desc, String signature, String[] exceptions ->
                     MethodVisitor methodVisitor = cv.visitMethod(access, name, desc, signature, exceptions);
-                    MethodVisitor adapter = new MethodLogAdapter(methodVisitor) {
+                    MethodVisitor methodLogVisitor = new MethodLogVisitor(methodVisitor) {
 
                         @Override
                         void visitCode() {
                             super.visitCode();
                             methodVisitor.visitVarInsn(Opcodes.ALOAD, 1);
-                            methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, sAgentClassName, "onClick", "(Landroid/view/View;)V");
+                            methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, sAgentClassName, "onClick", "(Landroid/view/View;)V", false);
                         }
                     }
-                    return adapter;
+                    return methodLogVisitor;
             }]
     ];
 
@@ -48,10 +48,10 @@ public class ReWriterAgent {
             Map<String, Object> map = new HashMap<>()
             map.put('methodName', key.name)
             map.put('methodDesc', key.desc)
-            map.put('adapter', {
+            map.put('methodVisitor', {
                 ClassVisitor cv, int access, String name, String desc, String signature, String[] exceptions ->
                     MethodVisitor methodVisitor = cv.visitMethod(access, name, desc, signature, exceptions);
-                    MethodVisitor adapter = new MethodLogAdapter(methodVisitor) {
+                    MethodVisitor methodLogVisitor = new MethodLogVisitor(methodVisitor) {
 
                         @Override
                         void visitInsn(int opcode) {
@@ -63,12 +63,12 @@ public class ReWriterAgent {
                                     // (this,bool)
                                     methodVisitor.visitVarInsn(Opcodes.ALOAD, 1);
                                 }
-                                methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, sAgentClassName, value.name, value.desc);
+                                methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, sAgentClassName, value.name, value.desc, false);
                             }
                             super.visitInsn(opcode);
                         }
                     }
-                    return adapter;
+                    return methodLogVisitor;
             })
             sFragmentMatchMaps.add(map)
         }
@@ -78,7 +78,7 @@ public class ReWriterAgent {
         return sClickMatchMaps
     }
 
-    public static List<Map<String, Object>> getFragmentReWriter(String fragmntFullClassName) {
+    public static List<Map<String, Object>> getFragmentReWriter() {
         return sFragmentMatchMaps;
     }
 

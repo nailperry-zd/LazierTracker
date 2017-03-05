@@ -6,10 +6,8 @@ import org.objectweb.asm.*
 
 /**
  * Created by bryansharp(bsp0911932@163.com) on 2016/5/10.
+ * Modified by nailperry on 2017/3/2.
  *
- * @author bryansharp
- * Project: FirstGradle
- * introduction:
  */
 public class ModifyClassUtil {
 
@@ -36,22 +34,26 @@ public class ModifyClassUtil {
     private
     static byte[] modifyClass(byte[] srcClass) throws IOException {
         ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-        ClassAdapter adapter = new MethodFilterClassAdapter(classWriter);
+        ClassVisitor methodFilterCV = new MethodFilterClassVisitor(classWriter);
         ClassReader cr = new ClassReader(srcClass);
-        cr.accept(adapter, ClassReader.SKIP_DEBUG);
+        cr.accept(methodFilterCV, ClassReader.SKIP_DEBUG);
         return classWriter.toByteArray();
     }
 
     private
     static void onlyVisitClassMethod(byte[] srcClass) throws IOException {
         ClassWriter classWriter = new ClassWriter(ClassWriter.COMPUTE_MAXS);
-        MethodFilterClassAdapter adapter = new MethodFilterClassAdapter(classWriter);
-        adapter.onlyVisit = true;
+        MethodFilterClassVisitor methodFilterCV = new MethodFilterClassVisitor(classWriter);
+        methodFilterCV.onlyVisit = true;
         ClassReader cr = new ClassReader(srcClass);
-        cr.accept(adapter, ClassReader.SKIP_DEBUG);
+        cr.accept(methodFilterCV, ClassReader.SKIP_DEBUG);
     }
 
-    static class MethodFilterClassAdapter extends ClassAdapter implements Opcodes {
+    private static boolean instanceOfFragment(String superName) {
+        return superName.equals('android/app/Fragment') || superName.equals('android/support/v4/app/Fragment')
+    }
+
+    static class MethodFilterClassVisitor extends ClassVisitor implements Opcodes {
 //        private String className;
         private List<Map<String, Object>> methodMatchMaps;
         public boolean onlyVisit = false;
@@ -59,9 +61,9 @@ public class ModifyClassUtil {
         private String superName
         private ClassVisitor classVisitor
 
-        public MethodFilterClassAdapter(
+        public MethodFilterClassVisitor(
                 final ClassVisitor cv) {
-            super(cv);
+            super(Opcodes.ASM5, cv);
             this.classVisitor = cv
         }
 
@@ -82,13 +84,13 @@ public class ModifyClassUtil {
                         // (this,bool)
                         mv.visitVarInsn(ALOAD, 1);
                     }
-                    mv.visitMethodInsn(INVOKESPECIAL, superName, key.name, key.desc);
+                    mv.visitMethodInsn(INVOKESPECIAL, superName, key.name, key.desc, false);
                     mv.visitVarInsn(ALOAD, 0);
                     if (value.desc.contains('Z')) {
                         // (this,bool)
                         mv.visitVarInsn(ALOAD, 1);
                     }
-                    mv.visitMethodInsn(INVOKESTATIC, ReWriterAgent.sAgentClassName, value.name, value.desc);
+                    mv.visitMethodInsn(INVOKESTATIC, ReWriterAgent.sAgentClassName, value.name, value.desc, false);
                     mv.visitInsn(RETURN);
                     mv.visitMaxs(1, 1);
                     mv.visitEnd();
@@ -143,15 +145,11 @@ public class ModifyClassUtil {
                 this.methodMatchMaps = ReWriterAgent.getClickReWriter()
                 Log.logEach('* visit *', "Class that implements OnClickListener")
             } else if (instanceOfFragment(superName)) {
-                this.methodMatchMaps = ReWriterAgent.getFragmentReWriter(superName)
+                this.methodMatchMaps = ReWriterAgent.getFragmentReWriter()
                 addMethods = ReWriterAgent.getFragmentAddMethods()
                 Log.logEach('* visit *', "Class that extends Fragment")
             }
             super.visit(version, access, name, signature, superName, interfaces);
-        }
-
-        private boolean instanceOfFragment(String superName) {
-            return superName.equals('android/app/Fragment') || superName.equals('android/support/v4/app/Fragment')
         }
 
         @Override
@@ -160,7 +158,7 @@ public class ModifyClassUtil {
             if (addMethods != null) {// It means this class extends Fragment
                 MethodCell delCell
                 // 找到后跳出循环
-                Iterator<MethodCell, MethodCell> iterator = addMethods.iterator()
+                Iterator<Map.Entry<MethodCell, MethodCell>> iterator = addMethods.entrySet().iterator()
                 while (iterator.hasNext()) {
                     Map.Entry<MethodCell, MethodCell> entry = iterator.next()
                     MethodCell key = entry.getKey()
@@ -185,12 +183,12 @@ public class ModifyClassUtil {
                     String metName = map.get('methodName');
                     String methodDesc = map.get('methodDesc');
                     if (name.equals(metName)) {
-                        Closure visit = map.get('adapter');
+                        Closure visit = map.get('methodVisitor');
                         if (visit != null) {
                             if (methodDesc != null) {
                                 if (methodDesc.equals(desc)) {
                                     if (onlyVisit) {
-                                        myMv = new MethodLogAdapter(cv.visitMethod(access, name, desc, signature, exceptions));
+                                        myMv = new MethodLogVisitor(cv.visitMethod(access, name, desc, signature, exceptions));
                                     } else {
                                         try {
                                             myMv = visit(cv, access, name, desc, signature, exceptions);
