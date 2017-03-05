@@ -55,7 +55,7 @@ public class ModifyClassUtil {
 
     static class MethodFilterClassVisitor extends ClassVisitor implements Opcodes {
 //        private String className;
-        private List<Map<String, Object>> methodMatchMaps;
+        private List<Map<String, Object>> methodMatchMaps = new ArrayList<>();
         public boolean onlyVisit = false;
         public HashMap<MethodCell, MethodCell> addMethods
         private String superName
@@ -70,7 +70,7 @@ public class ModifyClassUtil {
         @Override
         void visitEnd() {
             Log.logEach('* visitEnd *');
-            if (addMethods != null) {
+            if (addMethods != null && addMethods.size() > 0) {
                 MethodVisitor mv;
                 // 添加剩下的方法，确保super.onHiddenChanged(hidden);等先被调用
                 addMethods.each {
@@ -142,10 +142,16 @@ public class ModifyClassUtil {
             Log.logEach('* visit *', Log.accCode2String(access), name, signature, superName, interfaces);
             this.superName = superName
             if (interfaces != null && interfaces.contains('android/view/View$OnClickListener')) {
-                this.methodMatchMaps = ReWriterAgent.getClickReWriter()
-                Log.logEach('* visit *', "Class that implements OnClickListener")
-            } else if (instanceOfFragment(superName)) {
-                this.methodMatchMaps = ReWriterAgent.getFragmentReWriter()
+                this.methodMatchMaps.add(ReWriterAgent.getClickReWriter())
+                Log.logEach('* visit *', "Class that implements View.OnClickListener")
+            }
+            if (interfaces != null && interfaces.contains('android/content/DialogInterface$OnClickListener')) {
+                this.methodMatchMaps.add(ReWriterAgent.getDialogClickReWriter())
+                Log.logEach('* visit *', "Class that implements DialogInterface.OnClickListener")
+            }
+
+            if (instanceOfFragment(superName)) {
+                this.methodMatchMaps.addAll(ReWriterAgent.getFragmentReWriter())
                 addMethods = ReWriterAgent.getFragmentAddMethods()
                 Log.logEach('* visit *', "Class that extends Fragment")
             }
@@ -177,7 +183,7 @@ public class ModifyClassUtil {
             if (!onlyVisit) {
                 Log.logEach("* visitMethod *", Log.accCode2String(access), name, desc, signature, exceptions);
             }
-            if (methodMatchMaps != null) {
+            if (methodMatchMaps != null && methodMatchMaps.size() > 0) {
                 for (int i = 0; i < methodMatchMaps.size(); i++) {
                     Map<String, Object> map = methodMatchMaps.get(i)
                     String metName = map.get('methodName');

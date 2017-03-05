@@ -21,7 +21,7 @@ public class ReWriterAgent {
         return fragmentAddMethods
     }
 
-    private static List<Map<String, Object>> sClickMatchMaps = [
+    private static Map<String, Object> sClickMatchMap =
             ['methodName': 'onClick', 'methodDesc': '(Landroid/view/View;)V', 'methodVisitor': {
                 ClassVisitor cv, int access, String name, String desc, String signature, String[] exceptions ->
                     MethodVisitor methodVisitor = cv.visitMethod(access, name, desc, signature, exceptions);
@@ -35,8 +35,25 @@ public class ReWriterAgent {
                         }
                     }
                     return methodLogVisitor;
-            }]
-    ];
+            }];
+
+    private static Map<String, Object> sDialogClickMatchMap =
+            ['methodName': 'onClick', 'methodDesc': '(Landroid/content/DialogInterface;I)V', 'methodVisitor': {
+                ClassVisitor cv, int access, String name, String desc, String signature, String[] exceptions ->
+                    MethodVisitor methodVisitor = cv.visitMethod(access, name, desc, signature, exceptions);
+                    MethodVisitor methodLogVisitor = new MethodLogVisitor(methodVisitor) {
+
+                        @Override
+                        void visitCode() {
+                            super.visitCode();
+                            methodVisitor.visitVarInsn(Opcodes.ALOAD, 0);
+                            methodVisitor.visitVarInsn(Opcodes.ALOAD, 1);
+                            methodVisitor.visitVarInsn(Opcodes.ALOAD, 2);
+                            methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, sAgentClassName, "onClick", "(Ljava/lang/Object;Landroid/content/DialogInterface;I)V", false);
+                        }
+                    }
+                    return methodLogVisitor;
+            }];
 
     private static List<Map<String, Object>> sFragmentMatchMaps = new ArrayList<>()
 
@@ -74,8 +91,12 @@ public class ReWriterAgent {
         }
     }
 
-    public static List<Map<String, Object>> getClickReWriter() {
-        return sClickMatchMaps
+    public static Map<String, Object> getClickReWriter() {
+        return sClickMatchMap
+    }
+
+    public static Map<String, Object> getDialogClickReWriter() {
+        return sDialogClickMatchMap
     }
 
     public static List<Map<String, Object>> getFragmentReWriter() {
