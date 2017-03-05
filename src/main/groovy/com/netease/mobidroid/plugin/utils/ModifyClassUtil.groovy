@@ -1,7 +1,7 @@
 package com.netease.mobidroid.plugin.utils
 
 import com.netease.mobidroid.plugin.MethodCell
-import com.netease.mobidroid.plugin.ReWriterAgent
+import com.netease.mobidroid.plugin.ReWriterConfig
 import org.objectweb.asm.*
 
 /**
@@ -53,12 +53,11 @@ public class ModifyClassUtil {
         return superName.equals('android/app/Fragment') || superName.equals('android/support/v4/app/Fragment')
     }
 
-    static class MethodFilterClassVisitor extends ClassVisitor implements Opcodes {
-//        private String className;
-        private List<Map<String, Object>> methodMatchMaps = new ArrayList<>();
+    static class MethodFilterClassVisitor extends ClassVisitor{
         public boolean onlyVisit = false;
-        public HashMap<MethodCell, MethodCell> addMethods
+        public HashSet<String> visitedFragMethods = new HashSet<>()// 无需判空
         private String superName
+        private String[] interfaces
         private ClassVisitor classVisitor
 
         public MethodFilterClassVisitor(
@@ -70,29 +69,34 @@ public class ModifyClassUtil {
         @Override
         void visitEnd() {
             Log.logEach('* visitEnd *');
-            if (addMethods != null && addMethods.size() > 0) {
+
+            if (instanceOfFragment(superName)) {
                 MethodVisitor mv;
                 // 添加剩下的方法，确保super.onHiddenChanged(hidden);等先被调用
-                addMethods.each {
-                    MethodCell key = it.getKey()
-                    MethodCell value = it.getValue()
+                Iterator<Map.Entry<String, MethodCell>> iterator = ReWriterConfig.sFragmentMethods.entrySet().iterator()
+                while (iterator.hasNext()) {
+                    Map.Entry<String, MethodCell> entry = iterator.next()
+                    String key = entry.getKey()
+                    MethodCell methodCell = entry.getValue()
 
-                    mv = classVisitor.visitMethod(ACC_PUBLIC, key.name, key.desc, null, null);
+                    if (visitedFragMethods.contains(key))
+                        continue
+                    mv = classVisitor.visitMethod(Opcodes.ACC_PUBLIC, methodCell.name, methodCell.desc, null, null);
                     mv.visitCode();
-                    mv.visitVarInsn(ALOAD, 0);
-                    if (key.desc.contains('Z')) {
+                    mv.visitVarInsn(Opcodes.ALOAD, 0);
+                    if (methodCell.desc.contains('Z')) {
                         // (this,bool)
-                        mv.visitVarInsn(ALOAD, 1);
+                        mv.visitVarInsn(Opcodes.ALOAD, 1);
                     }
-                    mv.visitMethodInsn(INVOKESPECIAL, superName, key.name, key.desc, false);
-                    mv.visitVarInsn(ALOAD, 0);
-                    if (value.desc.contains('Z')) {
+                    mv.visitMethodInsn(Opcodes.INVOKESPECIAL, superName, methodCell.name, methodCell.desc, false);
+                    mv.visitVarInsn(Opcodes.ALOAD, 0);
+                    if (methodCell.agentDesc.contains('Z')) {
                         // (this,bool)
-                        mv.visitVarInsn(ALOAD, 1);
+                        mv.visitVarInsn(Opcodes.ALOAD, 1);
                     }
-                    mv.visitMethodInsn(INVOKESTATIC, ReWriterAgent.sAgentClassName, value.name, value.desc, false);
-                    mv.visitInsn(RETURN);
-                    mv.visitMaxs(1, 1);
+                    mv.visitMethodInsn(Opcodes.INVOKESTATIC, ReWriterConfig.sAgentClassName, methodCell.agentName, methodCell.agentDesc, false);
+                    mv.visitInsn(Opcodes.RETURN);
+                    mv.visitMaxs(methodCell.paramsCount, methodCell.paramsCount);
                     mv.visitEnd();
                 }
             }
@@ -141,79 +145,77 @@ public class ModifyClassUtil {
                           String signature, String superName, String[] interfaces) {
             Log.logEach('* visit *', Log.accCode2String(access), name, signature, superName, interfaces);
             this.superName = superName
-            if (interfaces != null && interfaces.contains('android/view/View$OnClickListener')) {
-                this.methodMatchMaps.add(ReWriterAgent.getClickReWriter())
-                Log.logEach('* visit *', "Class that implements View.OnClickListener")
-            }
-            if (interfaces != null && interfaces.contains('android/content/DialogInterface$OnClickListener')) {
-                this.methodMatchMaps.add(ReWriterAgent.getDialogClickReWriter())
-                Log.logEach('* visit *', "Class that implements DialogInterface.OnClickListener")
-            }
-
-            if (instanceOfFragment(superName)) {
-                this.methodMatchMaps.addAll(ReWriterAgent.getFragmentReWriter())
-                addMethods = ReWriterAgent.getFragmentAddMethods()
-                Log.logEach('* visit *', "Class that extends Fragment")
-            }
+            this.interfaces = interfaces
             super.visit(version, access, name, signature, superName, interfaces);
         }
 
         @Override
         public MethodVisitor visitMethod(int access, String name,
                                          String desc, String signature, String[] exceptions) {
-            if (addMethods != null) {// It means this class extends Fragment
-                MethodCell delCell
-                // 找到后跳出循环
-                Iterator<Map.Entry<MethodCell, MethodCell>> iterator = addMethods.entrySet().iterator()
-                while (iterator.hasNext()) {
-                    Map.Entry<MethodCell, MethodCell> entry = iterator.next()
-                    MethodCell key = entry.getKey()
-                    if (name.equals(key.name) && desc.equals(key.desc)) {
-                        delCell = key
-                        break
-                    }
-                }
-                if (delCell != null) {
-                    // 如果该Fragment类中存在该方法则删除
-                    addMethods.remove(delCell)
-                }
-
-            }
             MethodVisitor myMv = null;
             if (!onlyVisit) {
                 Log.logEach("* visitMethod *", Log.accCode2String(access), name, desc, signature, exceptions);
             }
-            if (methodMatchMaps != null && methodMatchMaps.size() > 0) {
-                for (int i = 0; i < methodMatchMaps.size(); i++) {
-                    Map<String, Object> map = methodMatchMaps.get(i)
-                    String metName = map.get('methodName');
-                    String methodDesc = map.get('methodDesc');
-                    if (name.equals(metName)) {
-                        Closure visit = map.get('methodVisitor');
-                        if (visit != null) {
-                            if (methodDesc != null) {
-                                if (methodDesc.equals(desc)) {
-                                    if (onlyVisit) {
-                                        myMv = new MethodLogVisitor(cv.visitMethod(access, name, desc, signature, exceptions));
-                                    } else {
-                                        try {
-                                            myMv = visit(cv, access, name, desc, signature, exceptions);
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
-                                            myMv = null
-                                        }
+            if (interfaces != null && interfaces.length > 0) {
+                MethodCell methodCell = ReWriterConfig.sInterfaceMethods.get(name + desc)
+                if (methodCell != null && interfaces.contains(methodCell.parent)) {
+                    if (onlyVisit) {
+                        myMv = new MethodLogVisitor(cv.visitMethod(access, name, desc, signature, exceptions));
+                    } else {
+                        try {
+                            MethodVisitor methodVisitor = cv.visitMethod(access, name, desc, signature, exceptions);
+                            myMv = new MethodLogVisitor(methodVisitor) {
+                                @Override
+                                void visitCode() {
+                                    super.visitCode();
+                                    for (int i = methodCell.paramsStart; i < methodCell.paramsStart + methodCell.paramsCount; i++) {
+                                        methodVisitor.visitVarInsn(Opcodes.ALOAD, i);
                                     }
-                                    // 成功匹配则跳出循环
-                                    break
-                                }
-                            } else {
-                                try {
-                                    myMv = visit(cv, access, name, desc, signature, exceptions);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                    myMv = null
+                                    methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, ReWriterConfig.sAgentClassName, methodCell.agentName, methodCell.agentDesc, false);
                                 }
                             }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            myMv = null
+                        }
+                    }
+                }
+            }
+
+            if (instanceOfFragment(superName)) {
+                MethodCell methodCell = ReWriterConfig.sFragmentMethods.get(name + desc)
+                if (methodCell != null) {
+                    // 记录该方法已存在
+                    visitedFragMethods.add(name + desc)
+                    if (onlyVisit) {
+                        myMv = new MethodLogVisitor(cv.visitMethod(access, name, desc, signature, exceptions));
+                    } else {
+                        try {
+                            MethodVisitor methodVisitor = cv.visitMethod(access, name, desc, signature, exceptions);
+                            myMv = new MethodLogVisitor(methodVisitor) {
+
+                                @Override
+                                void visitInsn(int opcode) {
+
+                                    // 确保super.onHiddenChanged(hidden);等先被调用
+                                    if (opcode == Opcodes.RETURN) { //在返回之前安插代码
+                                        methodVisitor.visitVarInsn(Opcodes.ALOAD, 0);
+                                        if (methodCell.agentDesc.contains('Z')) {
+                                            // (this,bool)
+                                            methodVisitor.visitVarInsn(Opcodes.ALOAD, 1);
+                                        }
+                                        /*for (def i = methodCell.paramsStart; i < methodCell.paramsStart + methodCell.paramsCount; i++) {
+                                            // Todo: 这里直接传入i居然报错：at stack depth 0, expected type java.lang.Object but found int；强制转换成Object才行。why?
+                                            methodVisitor.visitVarInsn(Opcodes.ALOAD, i);
+                                        }*/
+                                        methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, ReWriterConfig.sAgentClassName, methodCell.agentName, methodCell.agentDesc, false);
+                                    }
+                                    super.visitInsn(opcode);
+                                }
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            myMv = null
                         }
                     }
                 }

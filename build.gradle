@@ -12,16 +12,3 @@ repositories {
 }
 
 
-apply plugin: 'maven'
-uploadArchives{
-    repositories.mavenDeployer {
-        // maven savePath
-        def deployPath = file('/Users/zhangdan/Desktop/Gradle_Plugin_Repo')
-        repository(url:"file://${deployPath.absolutePath}")
-        pom.project{
-            groupId "com.netease.mobidroid"
-            artifactId "hubbledata-gradle-plugin"
-            version "0.0.4"
-        }
-    }
-}
