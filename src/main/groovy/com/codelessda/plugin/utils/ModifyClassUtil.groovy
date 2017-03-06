@@ -1,7 +1,7 @@
-package com.netease.mobidroid.plugin.utils
+package com.codelessda.plugin.utils
 
-import com.netease.mobidroid.plugin.MethodCell
-import com.netease.mobidroid.plugin.ReWriterConfig
+import com.codelessda.plugin.MethodCell
+import com.codelessda.plugin.ReWriterConfig
 import org.objectweb.asm.*
 
 /**

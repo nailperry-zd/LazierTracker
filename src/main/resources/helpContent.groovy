@@ -5,7 +5,7 @@
 //          hi, 这里是插件使用指南，你可以直接把整个内容复制到build.gradle中，然后解除注释作为初始设置
 //          如果嫌烦可以在下面配置showHelp = false 来关闭这个帮助内容的输出
 //
-//hubbleConfig {
+//codelessdaConfig {
 //    //this will determine the name of this plugin transform, no practical use.
 //    pluginName = 'myPluginTest'
 //    //turn this on to make it print help content, default value is true
@@ -19,7 +19,7 @@
 //    //our plugin will inject package defined in 'AndroidManifest.xml' and 'butterknife.internal.butterknife.internal.DebouncingOnClickListener' by default.
 //    //structure is like ['butterknife.internal','com.a.c'], type is HashSet<String>.
 //    //You can also specify the name of the class;
-//    //example: ['com.netease.hearttouch.BaseFragment']
+//    //example: ['com.xxx.xxx.BaseFragment']
 //    targetPackages = []
 //}
 //

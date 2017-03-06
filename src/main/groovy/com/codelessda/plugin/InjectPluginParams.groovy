@@ -1,6 +1,6 @@
-package com.netease.mobidroid.plugin
+package com.codelessda.plugin
 
-public class HubblePluginParams {
+public class InjectPluginParams {
     String pluginName = ''
     boolean enableModify = true
     boolean watchTimeConsume = false

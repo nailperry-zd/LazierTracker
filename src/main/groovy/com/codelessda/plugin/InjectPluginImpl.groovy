@@ -1,23 +1,23 @@
-package com.netease.mobidroid.plugin
+package com.codelessda.plugin
 
 import com.android.build.gradle.BaseExtension
-import com.netease.mobidroid.plugin.utils.DataHelper
-import com.netease.mobidroid.plugin.utils.Log
+import com.codelessda.plugin.utils.DataHelper
+import com.codelessda.plugin.utils.Log
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
-class HubblePluginImpl implements Plugin<Project> {
+class InjectPluginImpl implements Plugin<Project> {
     @Override
     void apply(Project project) {
         println ":applied Hubble"
-        project.extensions.create('hubbleConfig', HubblePluginParams)
+        project.extensions.create('codelessdaConfig', InjectPluginParams)
         registerTransform(project)
         initDir(project);
         project.afterEvaluate {
-            Log.setQuiet(project.hubbleConfig.keepQuiet);
-            Log.setShowHelp(project.hubbleConfig.showHelp);
+            Log.setQuiet(project.codelessdaConfig.keepQuiet);
+            Log.setShowHelp(project.codelessdaConfig.showHelp);
             Log.logHelp();
-            if (project.hubbleConfig.watchTimeConsume) {
+            if (project.codelessdaConfig.watchTimeConsume) {
                 Log.info "watchTimeConsume enabled"
                 project.gradle.addListener(new TimeListener())
             } else {

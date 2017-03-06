@@ -1,6 +1,6 @@
-package com.netease.mobidroid.plugin
+package com.codelessda.plugin
 
-import com.netease.mobidroid.plugin.utils.Log
+import com.codelessda.plugin.utils.Log
 import org.gradle.BuildListener
 import org.gradle.BuildResult
 import org.gradle.api.Task

@@ -1,4 +1,4 @@
-package com.netease.mobidroid.plugin.utils
+package com.codelessda.plugin.utils
 
 public class DataHelper {
     static Map getExt() {

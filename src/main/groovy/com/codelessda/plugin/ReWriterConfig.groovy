@@ -1,4 +1,4 @@
-package com.netease.mobidroid.plugin
+package com.codelessda.plugin
 
 /**
  * Created by zhangdan on 17/3/3.

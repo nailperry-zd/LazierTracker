@@ -18,7 +18,7 @@ Gradle Plugin for Codelessly Data Acquisition on Android Platform.
 build.gradle中添加如下代码：
 
 ```
-hubbleConfig {
+codelessdaConfig {
     //this will determine the name of this plugin transform, no practical use.
     pluginName = 'myPluginTest'
     //turn this on to make it print help content, default value is true
@@ -32,7 +32,7 @@ hubbleConfig {
     //our plugin will inject package defined in 'AndroidManifest.xml' and 'butterknife.internal.butterknife.internal.DebouncingOnClickListener' by default.
     //structure is like ['butterknife.internal','com.a.c'], type is HashSet<String>.
     //You can also specify the name of the class;
-    //example: ['com.netease.hearttouch.BaseFragment']
+    //example: ['com.xxx.xxx.BaseFragment']
     targetPackages = []
 }
 ```

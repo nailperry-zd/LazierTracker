@@ -1,13 +1,13 @@
-package com.netease.mobidroid.plugin
+package com.codelessda.plugin
 
 import com.android.annotations.NonNull
 import com.android.annotations.Nullable
 import com.android.build.api.transform.*
 import com.android.build.gradle.AppExtension
 import com.android.build.gradle.internal.pipeline.TransformManager
-import com.netease.mobidroid.plugin.utils.DataHelper
-import com.netease.mobidroid.plugin.utils.Log
-import com.netease.mobidroid.plugin.utils.ModifyClassUtil
+import com.codelessda.plugin.utils.DataHelper
+import com.codelessda.plugin.utils.Log
+import com.codelessda.plugin.utils.ModifyClassUtil
 import groovy.io.FileType
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.FileUtils
@@ -60,7 +60,7 @@ public class InjectTransform extends Transform {
             @NonNull Collection<TransformInput> referencedInputs,
             @Nullable TransformOutputProvider outputProvider,
             boolean isIncremental) throws IOException, TransformException, InterruptedException {
-        Log.info "==============${project.hubbleConfig.pluginName + ' '}transform enter=============="
+        Log.info "==============${project.codelessdaConfig.pluginName + ' '}transform enter=============="
         android = project.extensions.getByType(AppExtension)
 //        String flavorAndBuildType = context.name.split("For")[1]
 //        Log.info("flavorAndBuildType ${flavorAndBuildType}")
@@ -72,7 +72,7 @@ public class InjectTransform extends Transform {
         }
 
         // 3rd party JAR packages that want our plugin to inject.
-        HashSet<String> inputPackages = project.hubbleConfig.targetPackages
+        HashSet<String> inputPackages = project.codelessdaConfig.targetPackages
         if (inputPackages != null) {
             targetPackages.addAll(inputPackages);
             Log.info "==============@targetPackages = ${targetPackages}=============="
@@ -177,7 +177,7 @@ public class InjectTransform extends Transform {
      * @return
      */
     static boolean shouldModifyClass(String className) {
-        if (project.hubbleConfig.enableModify && targetPackages != null) {
+        if (project.codelessdaConfig.enableModify && targetPackages != null) {
             Iterator<String> iterator = targetPackages.iterator()
             // 注意，闭包里的return语句相当于continue，不会跳出遍历，故用while或for
             while (iterator.hasNext()) {
