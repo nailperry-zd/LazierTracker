@@ -131,6 +131,9 @@ public class MainActivity extends Activity implements OnClickListener, android.c
 }
 ```
 
+## ASM语法实战
+
+[目标方法对应的ASM字节码操作](/bytecodes.md)
 
 ## 开发遇到的坑
 
@@ -138,12 +141,11 @@ public class MainActivity extends Activity implements OnClickListener, android.c
 - visitInsn尾部插入代码出错：at stack depth 0, expected type java.lang.Object but found int
 
 ```
-for (def i = methodCell.paramsStart; i < methodCell.paramsStart + methodCell.paramsCount; i++) {  
-	// Todo: 这里直接传入i居然报错：at stack depth 0, expected type java.lang.Object but found int；强制转换成Object才行。why?                                                                  
-	methodVisitor.visitVarInsn(Opcodes.ALOAD, i);
+for (def i = methodCell.paramsStart; i < methodCell.paramsStart + methodCell.paramsCount; i++) {
+    // Todo: 这里直接传入i居然报错：at stack depth 0, expected type java.lang.Object but found int；强制转换成Object才行。why?
+    methodVisitor.visitVarInsn(Opcodes.ALOAD, i);
 }
 ```
-
 - v7兼容性问题
 
 ```
