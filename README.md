@@ -53,6 +53,35 @@ codelessdaConfig {
 - 对app中指定包进行扫描，筛选出所有父类为`android/app/Fragment`或`android/support/v4/app/Fragment`的类。
 - 对这些Fragment子类的`onResumed`，`onPaused`，`onHiddenChanged`，`setFragmentUserVisibleHint`方法的字节码进行修改，添加数据采集代码。
 
+目标效果：
+
+```
+public class BaseFragment extends Fragment {
+    public BaseFragment() {
+    }
+
+    public void onResume() {
+        super.onResume();
+        PluginAgent.onFragmentResume(this);
+    }
+
+    public void onHiddenChanged(boolean var1) {
+        super.onHiddenChanged(var1);
+        PluginAgent.onFragmentHiddenChanged(this);
+    }
+
+    public void onPause() {
+        super.onPause();
+        PluginAgent.onFragmentPause(this);
+    }
+
+    public void setUserVisibleHint(boolean var1) {
+        super.setUserVisibleHint(var1);
+        PluginAgent.setFragmentUserVisibleHint(this, var1);
+    }
+}
+```
+
 ### 2. 目标方法在接口中声明
 
 目标方法：
@@ -67,7 +96,36 @@ codelessdaConfig {
 
 具体实现：
 
-- 对app中指定包进行扫描，筛选出实现了声明目标方法的接口的类，在目标方法中添加数据采集代码。
+- 对app中指定包进行扫描，筛选出实现了目标接口的类，在目标方法中添加数据采集代码。
+
+> 例如，筛选出实现了`android/view/View$OnClickListener`接口的类，然后在`onClick(Landroid/view/View;)V`方法中注入采集数据的代码。
+
+目标效果：
+
+```
+public class MainActivity extends Activity implements OnClickListener, android.content.DialogInterface.OnClickListener {
+    public MainActivity() {
+    }
+
+    protected void onCreate(Bundle var1) {
+        super.onCreate(var1);
+        this.setContentView(2130968603);
+        (new Builder(this)).setMessage("申请GPS权限").setPositiveButton("确定", new android.content.DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface var1, int var2) {
+                PluginAgent.onClick(this, var1, var2);
+            }
+        }).show();
+    }
+
+    public void onClick(DialogInterface var1, int var2) {
+        PluginAgent.onClick(this, var1, var2);
+    }
+
+    public void onClick(View var1) {
+        PluginAgent.onClick(var1);
+    }
+}
+```
 
 
 ## Groovy开发遇到的坑
