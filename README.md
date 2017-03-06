@@ -128,7 +128,7 @@ public class MainActivity extends Activity implements OnClickListener, android.c
 ```
 
 
-## Groovy开发遇到的坑
+## 开发遇到的坑
 
 - each闭包中的return相当于普通循环中的continue
 - visitInsn尾部插入代码出错：at stack depth 0, expected type java.lang.Object but found int
@@ -138,4 +138,10 @@ for (def i = methodCell.paramsStart; i < methodCell.paramsStart + methodCell.par
 	// Todo: 这里直接传入i居然报错：at stack depth 0, expected type java.lang.Object but found int；强制转换成Object才行。why?                                                                  
 	methodVisitor.visitVarInsn(Opcodes.ALOAD, i);
 }
+```
+
+- v7兼容性问题
+
+```
+java.lang.NoSuchFieldError: No static field abc_ic_ab_back_mtrl_am_alpha of type I in class Landroid/support/v7/appcompat/R$drawable; or its superclasses (declaration of 'android.support.v7.appcompat.R$drawable' appears in /data/app/net.coding.program-1/base.apk:classes86.dex)
 ```
