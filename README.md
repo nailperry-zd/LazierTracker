@@ -107,26 +107,64 @@ public class BaseFragment extends Fragment {
 目标效果：
 
 ```
-public class MainActivity extends Activity implements OnClickListener, android.content.DialogInterface.OnClickListener {
+public class MainActivity extends AppCompatActivity implements OnClickListener, android.content.DialogInterface.OnClickListener, OnItemClickListener, OnItemSelectedListener, OnRatingBarChangeListener, OnSeekBarChangeListener, OnCheckedChangeListener, android.widget.RadioGroup.OnCheckedChangeListener, OnGroupClickListener, OnChildClickListener {
     public MainActivity() {
     }
 
     protected void onCreate(Bundle var1) {
         super.onCreate(var1);
         this.setContentView(2130968603);
-        (new Builder(this)).setMessage("申请GPS权限").setPositiveButton("确定", new android.content.DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface var1, int var2) {
-                PluginAgent.onClick(this, var1, var2);
-            }
-        }).show();
+    }
+
+    public void onClick(View var1) {
+        PluginAgent.onClick(var1);
     }
 
     public void onClick(DialogInterface var1, int var2) {
         PluginAgent.onClick(this, var1, var2);
     }
 
-    public void onClick(View var1) {
-        PluginAgent.onClick(var1);
+    public void onItemClick(AdapterView<?> var1, View var2, int var3, long var4) {
+        PluginAgent.onItemClick(this, var1, var2, var3, var4);
+    }
+
+    public void onItemSelected(AdapterView<?> var1, View var2, int var3, long var4) {
+        PluginAgent.onItemSelected(this, var1, var2, var3, var4);
+    }
+
+    public void onNothingSelected(AdapterView<?> var1) {
+    }
+
+    public void onCheckedChanged(CompoundButton var1, boolean var2) {
+        PluginAgent.onCheckedChanged(this, var1, var2);
+    }
+
+    public boolean onChildClick(ExpandableListView var1, View var2, int var3, int var4, long var5) {
+        PluginAgent.onChildClick(this, var1, var2, var3, var4, var5);
+        return false;
+    }
+
+    public boolean onGroupClick(ExpandableListView var1, View var2, int var3, long var4) {
+        PluginAgent.onGroupClick(this, var1, var2, var3, var4);
+        return false;
+    }
+
+    public void onCheckedChanged(RadioGroup var1, int var2) {
+        PluginAgent.onCheckedChanged(this, var1, var2);
+    }
+
+    public void onRatingChanged(RatingBar var1, float var2, boolean var3) {
+        PluginAgent.onRatingChanged(this, var1, var2, var3);
+    }
+
+    public void onProgressChanged(SeekBar var1, int var2, boolean var3) {
+    }
+
+    public void onStartTrackingTouch(SeekBar var1) {
+    }
+
+    public void onStopTrackingTouch(SeekBar var1) {
+        PluginAgent.onStopTrackingTouch(this, var1);
     }
 }
 ```
