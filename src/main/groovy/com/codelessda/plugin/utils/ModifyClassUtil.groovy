@@ -86,13 +86,13 @@ public class ModifyClassUtil {
                     mv.visitVarInsn(Opcodes.ALOAD, 0);
                     if (methodCell.desc.contains('Z')) {
                         // (this,bool)
-                        mv.visitVarInsn(Opcodes.ALOAD, 1);
+                        mv.visitVarInsn(Opcodes.ILOAD, 1);
                     }
                     mv.visitMethodInsn(Opcodes.INVOKESPECIAL, superName, methodCell.name, methodCell.desc, false);
                     mv.visitVarInsn(Opcodes.ALOAD, 0);
                     if (methodCell.agentDesc.contains('Z')) {
                         // (this,bool)
-                        mv.visitVarInsn(Opcodes.ALOAD, 1);
+                        mv.visitVarInsn(Opcodes.ILOAD, 1);
                     }
                     mv.visitMethodInsn(Opcodes.INVOKESTATIC, ReWriterConfig.sAgentClassName, methodCell.agentName, methodCell.agentDesc, false);
                     mv.visitInsn(Opcodes.RETURN);
@@ -169,7 +169,7 @@ public class ModifyClassUtil {
                                 void visitCode() {
                                     super.visitCode();
                                     for (int i = methodCell.paramsStart; i < methodCell.paramsStart + methodCell.paramsCount; i++) {
-                                        methodVisitor.visitVarInsn(Opcodes.ALOAD, i);
+                                        methodVisitor.visitVarInsn(methodCell.opcodes[i - methodCell.paramsStart], i);
                                     }
                                     methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, ReWriterConfig.sAgentClassName, methodCell.agentName, methodCell.agentDesc, false);
                                 }
@@ -202,7 +202,7 @@ public class ModifyClassUtil {
                                         methodVisitor.visitVarInsn(Opcodes.ALOAD, 0);
                                         if (methodCell.agentDesc.contains('Z')) {
                                             // (this,bool)
-                                            methodVisitor.visitVarInsn(Opcodes.ALOAD, 1);
+                                            methodVisitor.visitVarInsn(Opcodes.ILOAD, 1);
                                         }
                                         methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, ReWriterConfig.sAgentClassName, methodCell.agentName, methodCell.agentDesc, false);
                                     }
