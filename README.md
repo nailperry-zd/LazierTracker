@@ -92,6 +92,10 @@ public class BaseFragment extends Fragment {
 - onItemSelected(Landroid/widget/AdapterView;Landroid/view/View;IJ)V
 - onGroupClick(Landroid/widget/ExpandableListView;Landroid/view/View;IJ)Z
 - onChildClick(Landroid/widget/ExpandableListView;Landroid/view/View;IIJ)Z
+- onRatingChanged(Landroid/widget/RatingBar;FZ)V
+- onStopTrackingTouch(Landroid/widget/SeekBar;)V
+- onCheckedChanged(Landroid/widget/CompoundButton;Z)V
+- onCheckedChanged(Landroid/widget/RadioGroup;I)V
 - ...
 
 具体实现：
