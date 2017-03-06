@@ -19,8 +19,10 @@ public class MethodCell {
     int paramsStart
     // 采集数据的方法参数个数
     int paramsCount
+    // 参数类型对应的ASM指令
+    List<Integer> opcodes
 
-    MethodCell(String name, String desc, String parent, String agentName, String agentDesc, int paramsStart, int paramsCount) {
+    MethodCell(String name, String desc, String parent, String agentName, String agentDesc, int paramsStart, int paramsCount, List<Integer> opcodes) {
         this.name = name
         this.desc = desc
         this.parent = parent
@@ -28,5 +30,6 @@ public class MethodCell {
         this.agentDesc = agentDesc
         this.paramsStart = paramsStart
         this.paramsCount = paramsCount
+        this.opcodes = opcodes
     }
 }
