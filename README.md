@@ -178,12 +178,26 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 - each闭包中的return相当于普通循环中的continue
 - visitInsn尾部插入代码出错：at stack depth 0, expected type java.lang.Object but found int
 
+注入的方法描述：(Ljava/lang/Object;Z)V
+
 ```
 for (def i = methodCell.paramsStart; i < methodCell.paramsStart + methodCell.paramsCount; i++) {
     // Todo: 这里直接传入i居然报错：at stack depth 0, expected type java.lang.Object but found int；强制转换成Object才行。why?
     methodVisitor.visitVarInsn(Opcodes.ALOAD, i);
 }
+
+// 改写成如下代码依然报错
+methodVisitor.visitVarInsn(Opcodes.ALOAD, 0);
+if (methodCell.paramsCount == 2) {
+    methodVisitor.visitVarInsn(Opcodes.ILOAD, 1);
+}
+methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, ReWriterConfig.sAgentClassName, methodCell.agentName, methodCell.agentDesc, false);
 ```
+
+出错原因：
+
+代码执行时，输入的方法描述实际为`(Ljava/lang/Object;)V`，只接收一个参数，而`methodCell.paramsCount`仍为2，导致`methodVisitor.visitVarInsn`指令加载了两次。
+
 - v7兼容性问题
 
 ```
