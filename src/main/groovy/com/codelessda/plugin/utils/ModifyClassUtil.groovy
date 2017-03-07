@@ -53,7 +53,35 @@ public class ModifyClassUtil {
         return superName.equals('android/app/Fragment') || superName.equals('android/support/v4/app/Fragment')
     }
 
-    static class MethodFilterClassVisitor extends ClassVisitor{
+    /**
+     *
+     * @param opcode
+     *            the opcode of the type instruction to be visited. This opcode
+     *            is either INVOKEVIRTUAL, INVOKESPECIAL, INVOKESTATIC or
+     *            INVOKEINTERFACE.
+     * @param owner
+     *            the internal name of the method's owner class (see
+     *            {@link Type#getInternalName() getInternalName}).
+     * @param name
+     *            the method's name.
+     * @param desc
+     *            the method's descriptor (see {@link Type Type}).
+     * @param start 方法参数起始索引（ 0：this，1+：普通参数 ）
+     *
+     * @param count 方法参数个数
+     *
+     * @param paramOpcodes 参数类型对应的ASM指令
+     *
+     */
+    private
+    static void visitMethodWithLoadedParams(MethodVisitor methodVisitor, int opcode, String owner, String methodName, String methodDesc, int start, int count, List<Integer> paramOpcodes) {
+        for (int i = start; i < start + count; i++) {
+            methodVisitor.visitVarInsn(paramOpcodes[i - start], i);
+        }
+        methodVisitor.visitMethodInsn(opcode, owner, methodName, methodDesc, false);
+    }
+
+    static class MethodFilterClassVisitor extends ClassVisitor {
         public boolean onlyVisit = false;
         public HashSet<String> visitedFragMethods = new HashSet<>()// 无需判空
         private String superName
@@ -83,18 +111,10 @@ public class ModifyClassUtil {
                         continue
                     mv = classVisitor.visitMethod(Opcodes.ACC_PUBLIC, methodCell.name, methodCell.desc, null, null);
                     mv.visitCode();
-                    mv.visitVarInsn(Opcodes.ALOAD, 0);
-                    if (methodCell.desc.contains('Z')) {
-                        // (this,bool)
-                        mv.visitVarInsn(Opcodes.ILOAD, 1);
-                    }
-                    mv.visitMethodInsn(Opcodes.INVOKESPECIAL, superName, methodCell.name, methodCell.desc, false);
-                    mv.visitVarInsn(Opcodes.ALOAD, 0);
-                    if (methodCell.agentDesc.contains('Z')) {
-                        // (this,bool)
-                        mv.visitVarInsn(Opcodes.ILOAD, 1);
-                    }
-                    mv.visitMethodInsn(Opcodes.INVOKESTATIC, ReWriterConfig.sAgentClassName, methodCell.agentName, methodCell.agentDesc, false);
+                    // call super
+                    visitMethodWithLoadedParams(mv, Opcodes.INVOKESPECIAL, superName, methodCell.name, methodCell.desc, methodCell.paramsStart, methodCell.paramsCount, methodCell.opcodes)
+                    // call injected method
+                    visitMethodWithLoadedParams(mv, Opcodes.INVOKESTATIC, ReWriterConfig.sAgentClassName, methodCell.agentName, methodCell.agentDesc, methodCell.paramsStart, methodCell.paramsCount, methodCell.opcodes)
                     mv.visitInsn(Opcodes.RETURN);
                     mv.visitMaxs(methodCell.paramsCount, methodCell.paramsCount);
                     mv.visitEnd();
@@ -168,10 +188,7 @@ public class ModifyClassUtil {
                                 @Override
                                 void visitCode() {
                                     super.visitCode();
-                                    for (int i = methodCell.paramsStart; i < methodCell.paramsStart + methodCell.paramsCount; i++) {
-                                        methodVisitor.visitVarInsn(methodCell.opcodes[i - methodCell.paramsStart], i);
-                                    }
-                                    methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, ReWriterConfig.sAgentClassName, methodCell.agentName, methodCell.agentDesc, false);
+                                    visitMethodWithLoadedParams(methodVisitor, Opcodes.INVOKESTATIC, ReWriterConfig.sAgentClassName, methodCell.agentName, methodCell.agentDesc, methodCell.paramsStart, methodCell.paramsCount, methodCell.opcodes)
                                 }
                             }
                         } catch (Exception e) {
@@ -199,15 +216,11 @@ public class ModifyClassUtil {
 
                                     // 确保super.onHiddenChanged(hidden);等先被调用
                                     if (opcode == Opcodes.RETURN) { //在返回之前安插代码
-                                        methodVisitor.visitVarInsn(Opcodes.ALOAD, 0);
-                                        if (methodCell.agentDesc.contains('Z')) {
-                                            // (this,bool)
-                                            methodVisitor.visitVarInsn(Opcodes.ILOAD, 1);
-                                        }
-                                        methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, ReWriterConfig.sAgentClassName, methodCell.agentName, methodCell.agentDesc, false);
+                                        visitMethodWithLoadedParams(methodVisitor, Opcodes.INVOKESTATIC, ReWriterConfig.sAgentClassName, methodCell.agentName, methodCell.agentDesc, methodCell.paramsStart, methodCell.paramsCount, methodCell.opcodes)
                                     }
                                     super.visitInsn(opcode);
                                 }
+
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
