@@ -17,7 +17,7 @@ public class ReWriterConfig {
 //    String agentDesc
 //    String paramsStart
 //    String paramsCount
-//    int[] opcodes
+//    List[] opcodes
 
     /*
     ('I',Opcodes.ILOAD);// I: int , retrieve integer from local variable
@@ -150,7 +150,7 @@ public class ReWriterConfig {
                 '(Z)V',
                 '',
                 'onFragmentHiddenChanged',
-                '(Ljava/lang/Object;)V',
+                '(Ljava/lang/Object;Z)V',
                 0, 2,
                 [Opcodes.ALOAD, Opcodes.ILOAD]))
     }
