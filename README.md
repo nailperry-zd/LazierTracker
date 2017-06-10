@@ -8,14 +8,37 @@ Gradle Plugin for Codelessly Data Acquisition on Android Platform.
 ## 开发环境
 - 语言：Groovy
 - 字节码操作库：ASM5.0
-- 工具：Android Studio 2.2
+- 工具：Android Studio 2.2(Mac)
 - Gradle：1.5+
 
 ## 使用
 
-### 自定义参数
+使用本插件，您可能需要做些自定义的配置，比如在`ReWriterConfig`中配置注入代码的类名及待注入的方法映射
 
-build.gradle中添加如下代码：
+例如
+
+	public static String sAgentClassName = 'com/codelessda/demo/PluginAgent'
+	
+	sInterfaceMethods.put('onClick(Landroid/view/View;)V', new MethodCell(
+	                'onClick',
+	                '(Landroid/view/View;)V',
+	                'android/view/View$OnClickListener',
+	                'onClick',
+	                '(Landroid/view/View;)V',
+	                1, 1,
+	                [Opcodes.ALOAD]))
+上述代码表明当一个`Activity`或`Fragment`实现了`View$OnClickListener`接口时，使用本插件遍历到该`Activity`或`Fragment`字节码中的`onClick(View v)`时，向该方法中插入`com.codelessda.demo.PluginAgent.onClick(v)`。`com.codelessda.demo.PluginAgent`中的`onClick(View v)`方法即是您想要注入到点击事件响应`onClick`中的代码。      
+
+### 1. 本地插件集成       
+
+`app`的`build.grade`中添加
+	
+	// 直接引用buildsrc的插件类
+	apply plugin: com.codelessda.plugin.InjectPluginImpl
+
+### 2. 自定义参数
+
+`app`的`build.grade`中添加如下代码，各配置项的含义请参考英文注释
 
 ```
 codelessdaConfig {
@@ -36,6 +59,10 @@ codelessdaConfig {
     targetPackages = []
 }
 ```
+
+### 3. 远程插件集成
+
+这一步需要您修改好`ReWriterConfig`后，发布插件到远程仓库，然后在app中引用远程插件。具体步骤请参考[CodelessDA-Gradle-Plugin-Repo](https://github.com/nailperry-zd/CodelessDA-Gradle-Plugin-Repo)
 
 ## AOP在无埋点中的应用
 
@@ -172,34 +199,3 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 ## ASM语法实战
 
 [目标方法对应的ASM字节码操作](/bytecodes.md)
-
-## 开发遇到的坑
-
-- each闭包中的return相当于普通循环中的continue
-- visitInsn尾部插入代码出错：at stack depth 0, expected type java.lang.Object but found int
-
-注入的方法描述：(Ljava/lang/Object;Z)V
-
-```
-for (def i = methodCell.paramsStart; i < methodCell.paramsStart + methodCell.paramsCount; i++) {
-    // Todo: 这里直接传入i居然报错：at stack depth 0, expected type java.lang.Object but found int；强制转换成Object才行。why?
-    methodVisitor.visitVarInsn(Opcodes.ALOAD, i);
-}
-
-// 改写成如下代码依然报错
-methodVisitor.visitVarInsn(Opcodes.ALOAD, 0);
-if (methodCell.paramsCount == 2) {
-    methodVisitor.visitVarInsn(Opcodes.ILOAD, 1);
-}
-methodVisitor.visitMethodInsn(Opcodes.INVOKESTATIC, ReWriterConfig.sAgentClassName, methodCell.agentName, methodCell.agentDesc, false);
-```
-
-出错原因：
-
-代码执行时，输入的方法描述实际为`(Ljava/lang/Object;)V`，只接收一个参数，而`methodCell.paramsCount`仍为2，导致`methodVisitor.visitVarInsn`指令加载了两次。
-
-- v7兼容性问题
-
-```
-java.lang.NoSuchFieldError: No static field abc_ic_ab_back_mtrl_am_alpha of type I in class Landroid/support/v7/appcompat/R$drawable; or its superclasses (declaration of 'android.support.v7.appcompat.R$drawable' appears in /data/app/net.coding.program-1/base.apk:classes86.dex)
-```
