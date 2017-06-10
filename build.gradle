@@ -1,14 +1,26 @@
-apply plugin: 'groovy'
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
 
-dependencies {
-    compile gradleApi()
-    compile localGroovy()
-    compile 'com.android.tools.build:gradle:2.2.2'
-    compile "commons-io:commons-io:1.4"
-    compile 'org.ow2.asm:asm:5.0'
+buildscript {
+    repositories {
+        jcenter()
+        maven {
+            url "https://raw.githubusercontent.com/nailperry-zd/CodelessDA-Gradle-Plugin-Repo/master"
+        }
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:2.2.2'
+        classpath 'com.codelessda:codelessda-gradle-plugin:0.0.1'
+        // NOTE: Do not place your application dependencies here; they belong
+        // in the individual module build.gradle files
+    }
 }
-repositories {
-    jcenter()
+
+allprojects {
+    repositories {
+        jcenter()
+    }
 }
 
-
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}

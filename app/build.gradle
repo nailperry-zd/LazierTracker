@@ -1,0 +1,59 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
+    defaultConfig {
+        applicationId "com.codelessda.demo"
+        minSdkVersion 15
+        targetSdkVersion 25
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    lintOptions {
+        abortOnError false
+    }
+
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    compile 'com.android.support:appcompat-v7:25.1.0'
+    testCompile 'junit:junit:4.12'
+    compile ('com.jakewharton:butterknife:8.5.1') {
+        exclude group: 'com.android.support', module: 'support-compat'
+    }
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
+}
+
+// 直接引用buildsrc的插件类
+//apply plugin: com.codelessda.plugin.InjectPluginImpl
+// 引用远程maven仓库的插件
+apply plugin: 'com.codelessda'
+codelessdaConfig {
+    //this will determine the name of this plugin transform, no practical use.
+    pluginName = 'myPluginTest'
+    //turn this on to make it print help content, default value is true
+    showHelp = true
+    //this flag will decide whether the log of the modifying process be printed or not, default value is false
+    keepQuiet = false
+    //this is a kit feature of the plugin, set it true to see the time consume of this build
+    watchTimeConsume = false
+
+    //this is the most important part, 3rd party JAR packages that want our plugin to inject;
+    //our plugin will inject package defined in 'AndroidManifest.xml' and 'butterknife.internal.butterknife.internal.DebouncingOnClickListener' by default.
+    //structure is like ['butterknife.internal','com.a.c'], type is HashSet<String>.
+    //You can also specify the name of the class;
+    //example: ['com.xxx.xxx.BaseFragment']
+    targetPackages = []
+}

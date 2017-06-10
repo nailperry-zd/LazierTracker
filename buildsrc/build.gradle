@@ -1,0 +1,27 @@
+apply plugin: 'groovy'
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+    compile 'com.android.tools.build:gradle:2.2.2'
+    compile "commons-io:commons-io:1.4"
+    compile 'org.ow2.asm:asm:5.0'
+}
+repositories {
+    jcenter()
+}
+
+
+apply plugin: 'maven'
+uploadArchives{
+    repositories.mavenDeployer {
+        // maven savePath
+        def deployPath = file('/Users/zhangdan/Desktop/Gradle_Plugin_Repo')
+        repository(url:"file://${deployPath.absolutePath}")
+        pom.project{
+            groupId "com.codelessda"
+            artifactId "codelessda-gradle-plugin"
+            version "0.0.1"
+        }
+    }
+}
