@@ -11,6 +11,14 @@ Gradle Plugin for Codelessly Data Acquisition on Android Platform.
 - 工具：Android Studio 2.2(Mac)
 - Gradle：1.5+
 
+**注意事项**
+
+在AS 3.0中，需要在`project`的 `gradle.properties`中添加
+
+```java
+android.enableD8=true
+```
+
 ## 使用
 
 使用本插件，您可能需要做些自定义的配置，比如在`ReWriterConfig`中配置注入代码的类名及待注入的方法映射
