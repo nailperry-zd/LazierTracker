@@ -3,6 +3,8 @@
 
 Gradle Plugin for Codelessly Data Acquisition on Android Platform.
 
+为便于大家深入理解本插件，特别梳理了一篇文章[应用于Android无埋点的Gradle插件解析](https://www.jianshu.com/p/250c83449dc0)，供大家参考。
+
 本插件基于开源项目[HiBeaver](https://github.com/BryanSharp/hibeaver)^_^
 
 ## 开发环境
