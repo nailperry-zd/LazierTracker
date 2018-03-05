@@ -4,7 +4,7 @@ android {
     compileSdkVersion 25
     buildToolsVersion "25.0.2"
     defaultConfig {
-        applicationId "com.codelessda.demo"
+        applicationId "com.codeless.demo"
         minSdkVersion 15
         targetSdkVersion 25
         versionCode 1
@@ -34,13 +34,14 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-compat'
     }
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
+    compile project(':tracker')
 }
 
 // 直接引用buildsrc的插件类
-//apply plugin: com.codelessda.plugin.InjectPluginImpl
+//apply plugin: com.codeless.plugin.InjectPluginImpl
 // 引用远程maven仓库的插件
-apply plugin: 'com.codelessda'
-codelessdaConfig {
+apply plugin: 'com.codeless'
+codelessConfig {
     //this will determine the name of this plugin transform, no practical use.
     pluginName = 'myPluginTest'
     //turn this on to make it print help content, default value is true

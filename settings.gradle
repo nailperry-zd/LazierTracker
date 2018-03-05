@@ -1,1 +1,1 @@
-include ':app', ':buildsrc'
+include ':app', ':buildsrc', ':tracker'

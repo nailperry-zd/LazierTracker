@@ -5,7 +5,7 @@
 //          hi, 这里是插件使用指南，你可以直接把整个内容复制到build.gradle中，然后解除注释作为初始设置
 //          如果嫌烦可以在下面配置showHelp = false 来关闭这个帮助内容的输出
 //
-//codelessdaConfig {
+//codelessConfig {
 //    //this will determine the name of this plugin transform, no practical use.
 //    pluginName = 'myPluginTest'
 //    //turn this on to make it print help content, default value is true

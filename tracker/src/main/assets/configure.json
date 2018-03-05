@@ -1,0 +1,10 @@
+{
+  "MainActivity": [
+    {
+      "pageName": "MainActivity",
+      "viewPath": "/btn",
+      "eventType": "viewClick",
+      "dataPath": "this.context.mTestField"
+    }
+  ]
+}
