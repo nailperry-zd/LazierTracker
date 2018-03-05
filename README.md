@@ -1,11 +1,7 @@
 ## 简介
-用于Android客户端无埋点数据采集的Gradle插件。
+本项目通过Android字节码插桩插件实现Android端无埋点（或自动埋点），并且支持根据配置文件实现业务数据的自动采集。
 
-Gradle Plugin for Codelessly Data Acquisition on Android Platform.
-
-为便于大家深入理解本插件，特别梳理了一篇文章[应用于Android无埋点的Gradle插件解析](https://www.jianshu.com/p/250c83449dc0)，供大家参考。
-
-本插件基于开源项目[HiBeaver](https://github.com/BryanSharp/hibeaver)^_^
+为便于大家深入理解Android字节码插桩插件，特别梳理了一篇文章[应用于Android无埋点的Gradle插件解析](https://www.jianshu.com/p/250c83449dc0)，供大家参考。
 
 ## 开发环境
 - 语言：Groovy
@@ -21,13 +17,13 @@ Gradle Plugin for Codelessly Data Acquisition on Android Platform.
 android.enableD8=true
 ```
 
-## 使用
+## 插件使用
 
-使用本插件，您可能需要做些自定义的配置，比如在`ReWriterConfig`中配置注入代码的类名及待注入的方法映射
+使用Android字节码插桩插件，您可能需要做些自定义的配置，比如在`ReWriterConfig`中配置注入代码的类名及待注入的方法映射
 
 例如
 
-	public static String sAgentClassName = 'com/codelessda/demo/PluginAgent'
+	public static String sAgentClassName = 'com/codeless/tracker/PluginAgent'
 	
 	sInterfaceMethods.put('onClick(Landroid/view/View;)V', new MethodCell(
 	                'onClick',
@@ -37,21 +33,21 @@ android.enableD8=true
 	                '(Landroid/view/View;)V',
 	                1, 1,
 	                [Opcodes.ALOAD]))
-上述代码表明当一个`Activity`或`Fragment`实现了`View$OnClickListener`接口时，使用本插件遍历到该`Activity`或`Fragment`字节码中的`onClick(View v)`时，向该方法中插入`com.codelessda.demo.PluginAgent.onClick(v)`。`com.codelessda.demo.PluginAgent`中的`onClick(View v)`方法即是您想要注入到点击事件响应`onClick`中的代码。      
+上述代码表明当一个`Activity`或`Fragment`实现了`View$OnClickListener`接口时，使用本插件遍历到该`Activity`或`Fragment`字节码中的`onClick(View v)`时，向该方法中插入`com.codeless.tracker.PluginAgent.onClick(v)`。`com.codeless.tracker.PluginAgent`中的`onClick(View v)`方法即是您想要注入到点击事件响应`onClick`中的代码。
 
 ### 1. 本地插件集成       
 
 `app`的`build.grade`中添加
 	
 	// 直接引用buildsrc的插件类
-	apply plugin: com.codelessda.plugin.InjectPluginImpl
+	apply plugin: com.codeless.plugin.InjectPluginImpl
 
 ### 2. 自定义参数
 
 `app`的`build.grade`中添加如下代码，各配置项的含义请参考英文注释
 
 ```
-codelessdaConfig {
+codelessConfig {
     //this will determine the name of this plugin transform, no practical use.
     pluginName = 'myPluginTest'
     //turn this on to make it print help content, default value is true
@@ -72,9 +68,9 @@ codelessdaConfig {
 
 ### 3. 远程插件集成
 
-这一步需要您修改好`ReWriterConfig`后，发布插件到远程仓库，然后在app中引用远程插件。具体步骤请参考[CodelessDA-Gradle-Plugin-Repo](https://github.com/nailperry-zd/CodelessDA-Gradle-Plugin-Repo)
+这一步需要您修改好`ReWriterConfig`后，发布插件到远程仓库，然后在app中引用远程插件。具体步骤请参考[Codeless-Gradle-Plugin-Repo](https://github.com/nailperry-zd/Codeless-Gradle-Plugin-Repo)
 
-## AOP在无埋点中的应用
+## 支持插桩的目标方法
 
 ### 1. 目标方法在Fragment中声明
 
@@ -209,3 +205,7 @@ public class MainActivity extends AppCompatActivity implements OnClickListener, 
 ## ASM语法实战
 
 [目标方法对应的ASM字节码操作](/bytecodes.md)
+
+## 致谢
+
+Android字节码插桩插件开发灵感来源于开源项目[HiBeaver](https://github.com/BryanSharp/hibeaver)，特此感谢。
