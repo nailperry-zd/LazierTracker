@@ -4,12 +4,12 @@ buildscript {
     repositories {
         jcenter()
         maven {
-            url "https://raw.githubusercontent.com/nailperry-zd/CodelessDA-Gradle-Plugin-Repo/master"
+            url "https://raw.githubusercontent.com/nailperry-zd/Codeless-Gradle-Plugin-Repo/master"
         }
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:2.2.2'
-        classpath 'com.codelessda:codelessda-gradle-plugin:0.0.1'
+        classpath 'com.codeless:codeless-gradle-plugin:0.0.1'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
