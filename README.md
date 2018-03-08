@@ -1,9 +1,9 @@
 # 简介
 本项目通过Android字节码插桩插件实现Android端无埋点（或自动埋点），并且支持根据配置文件实现业务数据的自动采集。
 
-为便于大家深入理解Android字节码插桩插件，特别梳理了一篇文章[应用于Android无埋点的Gradle插件解析](https://www.jianshu.com/p/250c83449dc0)，供大家参考。
-
 # 无埋点插件
+
+为便于大家深入理解Android字节码插桩插件，特别梳理了一篇文章[应用于Android无埋点的Gradle插件解析](https://www.jianshu.com/p/250c83449dc0)，供大家参考。
 
 ## 原理
 

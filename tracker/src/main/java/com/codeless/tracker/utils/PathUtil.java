@@ -13,7 +13,6 @@ import android.view.ViewParent;
 import android.widget.AdapterView;
 import android.widget.ExpandableListView;
 
-import com.alibaba.fastjson.JSONObject;
 import com.codeless.tracker.ConfigConstants;
 import com.codeless.tracker.PluginAgent;
 
