@@ -1,8 +1,11 @@
 package com.codeless.tracker;
 
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
+import android.util.Pair;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CompoundButton;
@@ -26,13 +29,30 @@ import java.util.Map;
 
 public class PluginAgent {
 
-    private static final String TAG = PluginAgent.class.getSimpleName();
+    public static HashMap<Integer, Pair<Integer, String>> sAliveFragMap = new HashMap<>();
+    private static final String TAG = "PluginAgent";
+
+    private Activity getActivity(View view) {
+        if (null != view) {
+            Context context = view.getContext();
+            while (context instanceof ContextWrapper) {
+                if (context instanceof Activity) {
+                    return (Activity) context;
+                }
+                context = ((ContextWrapper) context).getBaseContext();
+            }
+        }
+
+        return null;
+    }
 
     public static void onClick(View view) {
+        boolean hasBusiness = false;
         // 解析dataPath
         Context context = view.getContext();
         if (context instanceof Activity) {
             String pageName = context.getClass().getSimpleName();
+            String currViewPath = PathUtil.getViewPath(view);
             Map<String, Object> configureMap = Tracker.instance(context).getConfigureMap();
             if (null != configureMap) {
                 JSONArray nodesArr = (JSONArray) configureMap.get(pageName);
@@ -40,19 +60,22 @@ public class PluginAgent {
                     for (int i = 0; i < nodesArr.size(); i++) {
                         JSONObject nodeObj = nodesArr.getJSONObject(i);
                         String viewPath = nodeObj.getString(ConfigConstants.VIEWPATH);
-                        String currViewPath = PathUtil.getViewPath(view);
                         if (currViewPath.equals(viewPath)) {
                             // 按照路径dataPath搜集数据
                             Object businessData = PathUtil.getDataObj(view, nodeObj);
                             Map<String, Object> attributes = new HashMap<>();
                             attributes.put(ConfigConstants.PAGENAME, pageName);
-                            attributes.put(ConfigConstants.VIEWPATH, viewPath);
+                            attributes.put(ConfigConstants.VIEWPATH, currViewPath);
                             attributes.put(ConfigConstants.BUSINESSDATA, businessData);
-                            Tracker.instance(context).trackEvent(pageName + viewPath, attributes);
+                            Tracker.instance(context).trackEvent(pageName + currViewPath, attributes);
+                            hasBusiness = true;
                             break;
                         }
                     }
                 }
+            }
+            if (!hasBusiness) {
+                Tracker.instance(context).trackEvent(pageName + currViewPath, null);
             }
         }
     }
@@ -93,13 +116,12 @@ public class PluginAgent {
 
     }
 
-
     public static void onFragmentResume(Object obj) {
-
+        addAliveFragment(obj);
     }
 
     public static void onFragmentPause(Object obj) {
-
+        removeAliveFragment(obj);
     }
 
     private static boolean checkFragment(android.support.v4.app.Fragment paramFragment) {
@@ -110,11 +132,34 @@ public class PluginAgent {
         return true;
     }
 
-    public static void setFragmentUserVisibleHint(Object fragmentObject, boolean isUserVisibleHint) {
-
+    public static void setFragmentUserVisibleHint(Object obj, boolean isUserVisibleHint) {
+        if (isUserVisibleHint) {
+            addAliveFragment(obj);
+        } else {
+            removeAliveFragment(obj);
+        }
     }
 
     public static void onFragmentHiddenChanged(Object fragment, boolean hidden) {
         setFragmentUserVisibleHint(fragment, !hidden);
+    }
+
+    private static void addAliveFragment(Object obj) {
+        View view = null;
+        if (obj instanceof Fragment) {
+            view = ((Fragment) obj).getView();
+        } else if (obj instanceof android.support.v4.app.Fragment) {
+            view = ((android.support.v4.app.Fragment) obj).getView();
+        }
+        if (null != view) {
+            int viewCode = view.hashCode();
+            sAliveFragMap.put(obj.hashCode(), new Pair<>(viewCode, obj.getClass().getSimpleName()));
+        }
+    }
+
+    private static void removeAliveFragment(Object obj) {
+        if (null != obj) {
+            sAliveFragMap.remove(obj.hashCode());
+        }
     }
 }

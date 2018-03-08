@@ -2,7 +2,7 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    buildToolsVersion '25.0.2'
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 25
@@ -20,7 +20,7 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:25.1.0'
-    compile 'com.alibaba:fastjson:1.2.8'
-
+    provided 'com.android.support:appcompat-v7:25.1.0'
+    provided 'com.alibaba:fastjson:1.2.8'
+    provided 'com.android.support:recyclerview-v7:25.3.1'
 }

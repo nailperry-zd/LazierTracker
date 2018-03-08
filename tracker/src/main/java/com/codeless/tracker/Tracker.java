@@ -16,7 +16,7 @@ import java.util.Map;
  */
 
 public class Tracker {
-    final static public String TAG = "Tracker";
+    final static public String TAG = "LazierTracker";
     private volatile static Tracker mTracker;
     private final Map<String, Object> mConfigureMap;
 
@@ -65,10 +65,12 @@ public class Tracker {
     public void trackEvent(String eventId, Map<String, Object> attributes) {
         // TODO: 2018/3/5 在此组装打点数据，然后上报服务器；这里为了演示，仅以日志形式打印出来
         Log.d(TAG, "成功打点事件->@eventId = " + eventId);
-        Iterator<Map.Entry<String, Object>> iterator = attributes.entrySet().iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<String, Object> entry = iterator.next();
-            Log.d(TAG, "attributes@" + entry.getKey() + " = " + entry.getValue());
+        if (null != attributes) {
+            Iterator<Map.Entry<String, Object>> iterator = attributes.entrySet().iterator();
+            while (iterator.hasNext()) {
+                Map.Entry<String, Object> entry = iterator.next();
+                Log.d(TAG, "attributes@" + entry.getKey() + " = " + entry.getValue());
+            }
         }
     }
 }

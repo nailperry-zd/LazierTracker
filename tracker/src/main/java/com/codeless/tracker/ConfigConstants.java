@@ -10,7 +10,8 @@ public class ConfigConstants {
     public final static String EVENTTYPE = "eventType";
     public final static String DATAPATH = "dataPath";
     public final static String BUSINESSDATA = "businessData";
-    public final static String KEY_THIS = "this";
+    public final static String START_THIS = "this";
+    public final static String START_ITEM = "item";
     public final static String KEY_CONTEXT = "context";
     public final static String KEY_PARENT = "parent";
 }
