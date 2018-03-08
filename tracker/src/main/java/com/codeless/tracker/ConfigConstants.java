@@ -7,6 +7,7 @@ package com.codeless.tracker;
 public class ConfigConstants {
     public final static String PAGENAME = "pageName";
     public final static String VIEWPATH = "viewPath";
+    public final static String VIEWPATHSUB = "subPath";
     public final static String EVENTTYPE = "eventType";
     public final static String DATAPATH = "dataPath";
     public final static String BUSINESSDATA = "businessData";

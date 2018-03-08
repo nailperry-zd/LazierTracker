@@ -44,24 +44,26 @@ public class PathUtil {
         }
     }
 
-    public static Object getDataObj(View view, JSONObject nodeObj) {
+    public static Object getDataObj(Object obj, String dataPath) {
         // 按照路径dataPath搜集数据
-        String dataPath = nodeObj.getString(ConfigConstants.DATAPATH);
         String[] paths = dataPath.split("\\.");
-        Object refer = view;
+        Object refer = obj;
         for (int j = 0; j < paths.length; j++) {
             String path = paths[j];
             switch (path) {
                 case ConfigConstants.START_THIS:
-                    refer = view;
+                    refer = obj;
                     break;
                 case ConfigConstants.START_ITEM:
-                    // 路径的起点
-                    Object viewParent = view.getParent();
-                    if (ReflectorUtil.isInstanceOfV7RecyclerView(viewParent)) {
-                        android.support.v7.widget.RecyclerView recyclerView = (android.support.v7.widget.RecyclerView) viewParent;
-                        RecyclerView.ViewHolder vh = recyclerView.getChildViewHolder(view);
-                        refer = vh;
+                    if (obj instanceof View) {
+                        // 路径的起点
+                        View view = (View) obj;
+                        Object viewParent = view.getParent();
+                        if (ReflectorUtil.isInstanceOfV7RecyclerView(viewParent)) {
+                            android.support.v7.widget.RecyclerView recyclerView = (android.support.v7.widget.RecyclerView) viewParent;
+                            RecyclerView.ViewHolder vh = recyclerView.getChildViewHolder(view);
+                            refer = vh;
+                        }
                     }
                     break;
                 case ConfigConstants.KEY_CONTEXT:

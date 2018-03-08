@@ -12,19 +12,31 @@
       "pageName": "SampleFeedsActivity",
       "viewPath": "/MainWindow/ContentFrameLayout[0]#android:content/LinearLayout[0]#root_view/FrameLayout[0]#content_view/FrameLayout[0]#fragment_container/NNFeedsFragment[0]/FrameLayout[0]#content_view/LinearLayout[0]/NoScrollViewPager[0]#view_pager/NNFNewsListFragment[0]/FrameLayout[0]#content_view/FrameLayout[0]#list_fragment_container/NNFSmartRefreshLayout[0]#refreshLayout/RecyclerView[0]#rrv_news_infos/RelativeLayout[0]",
       "eventType": "viewClick",
-      "dataPath": "item.mNewsInfo.title"
+      "dataPath": "item.mNewsInfo",
+      "subPath": [
+        "infoId",
+        "title"
+      ]
     },
     {
       "pageName": "SampleFeedsActivity",
       "viewPath": "/MainWindow/ContentFrameLayout[0]#android:content/LinearLayout[0]#root_view/FrameLayout[0]#content_view/FrameLayout[0]#fragment_container/NNFeedsFragment[0]/FrameLayout[0]#content_view/LinearLayout[0]/NoScrollViewPager[0]#view_pager/NNFNewsListFragment[0]/FrameLayout[0]#content_view/FrameLayout[0]#list_fragment_container/NNFSmartRefreshLayout[0]#refreshLayout/RecyclerView[0]#rrv_news_infos/LinearLayout[0]",
       "eventType": "viewClick",
-      "dataPath": "item.mNewsInfo.title"
+      "dataPath": "item.mNewsInfo",
+      "subPath": [
+        "infoId",
+        "title"
+      ]
     },
     {
       "pageName": "SampleFeedsActivity",
       "viewPath": ".*rrv_news_infos/(LinearLayout|RelativeLayout)\\[[0-9]+\\]$",
       "eventType": "viewClick",
-      "dataPath": "item.mNewsInfo.title"
+      "dataPath": "item.mNewsInfo",
+      "subPath": [
+        "infoId",
+        "title"
+      ]
     }
   ]
 }

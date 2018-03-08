@@ -17,6 +17,7 @@ import android.widget.SeekBar;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.codeless.tracker.utils.PathUtil;
+import com.codeless.tracker.utils.StringEncrypt;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -53,6 +54,7 @@ public class PluginAgent {
         if (context instanceof Activity) {
             String pageName = context.getClass().getSimpleName();
             String currViewPath = PathUtil.getViewPath(view);
+            String eventId = StringEncrypt.Encrypt(pageName + currViewPath, StringEncrypt.DEFAULT);
             Map<String, Object> configureMap = Tracker.instance(context).getConfigureMap();
             if (null != configureMap) {
                 JSONArray nodesArr = (JSONArray) configureMap.get(pageName);
@@ -60,14 +62,24 @@ public class PluginAgent {
                     for (int i = 0; i < nodesArr.size(); i++) {
                         JSONObject nodeObj = nodesArr.getJSONObject(i);
                         String viewPath = nodeObj.getString(ConfigConstants.VIEWPATH);
+                        String dataPath = nodeObj.getString(ConfigConstants.DATAPATH);
                         if (currViewPath.equals(viewPath) || PathUtil.match(currViewPath, viewPath)) {
                             // 按照路径dataPath搜集数据
-                            Object businessData = PathUtil.getDataObj(view, nodeObj);
+                            Object businessData = PathUtil.getDataObj(view, dataPath);
                             Map<String, Object> attributes = new HashMap<>();
                             attributes.put(ConfigConstants.PAGENAME, pageName);
                             attributes.put(ConfigConstants.VIEWPATH, currViewPath);
-                            attributes.put(ConfigConstants.BUSINESSDATA, businessData);
-                            Tracker.instance(context).trackEvent(pageName + currViewPath, attributes);
+                            JSONArray subPaths = nodeObj.getJSONArray(ConfigConstants.VIEWPATHSUB);
+                            if (null == subPaths || subPaths.size() == 0) {
+                                attributes.put(ConfigConstants.BUSINESSDATA, businessData);
+                            } else {
+                                for (int j = 0; j < subPaths.size(); j++) {
+                                    String subPath = subPaths.getString(j);
+                                    Object obj = PathUtil.getDataObj(businessData, subPath);
+                                    attributes.put(subPath, obj);
+                                }
+                            }
+                            Tracker.instance(context).trackEvent(eventId, attributes);
                             hasBusiness = true;
                             break;
                         }
@@ -75,7 +87,7 @@ public class PluginAgent {
                 }
             }
             if (!hasBusiness) {
-                Tracker.instance(context).trackEvent(pageName + currViewPath, null);
+                Tracker.instance(context).trackEvent(eventId, null);
             }
         }
     }
