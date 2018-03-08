@@ -2,19 +2,38 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    buildToolsVersion '25.0.2'
     defaultConfig {
         applicationId "com.codeless.demo"
         minSdkVersion 15
         targetSdkVersion 25
         versionCode 1
         versionName "1.0"
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "APP_KEY", "\"3c11d60d903e49d5a47ad2a58bb0db97\"")
+        buildConfigField("String", "APP_SECRET", "\"ca5137e40b874abd893e762f1d53d839\"")
+    }
+    signingConfigs {
+        releaseConfig {
+            // keystore
+            storeFile file('../laziertracker.jks')
+            // keys
+            Properties properties = new Properties()
+            File propertyFile = new File(rootDir.getAbsolutePath() + "/release.properties")
+            properties.load(propertyFile.newDataInputStream())
+            storePassword properties.get('storepassword')
+            keyAlias properties.get('keyalias')
+            keyPassword properties.get('keypassword')
+        }
     }
     buildTypes {
+        debug {
+            minifyEnabled false
+            signingConfig signingConfigs.releaseConfig
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.releaseConfig
         }
     }
     lintOptions {
@@ -25,22 +44,34 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    compile 'com.android.support:appcompat-v7:25.1.0'
-    testCompile 'junit:junit:4.12'
+    compile "com.android.support:appcompat-v7:$rootProject.supportLibraryVersion"
     compile ('com.jakewharton:butterknife:8.5.1') {
         exclude group: 'com.android.support', module: 'support-compat'
     }
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.5.1'
     compile project(':tracker')
+
+    // data-sdk依赖库
+    compile 'com.alibaba:fastjson:1.2.8'
+    // ui-sdk依赖库
+    compile "com.android.support:recyclerview-v7:$rootProject.supportLibraryVersion"
+    compile "com.readystatesoftware.systembartint:systembartint:$rootProject.systembartintVersion"
+    compile 'com.github.bumptech.glide:glide:3.7.0'
+
+    compile "com.netease.youliao:newsfeeds-data:$rootProject.newsfeedsDataVersion"
+    compile "com.netease.youliao:newsfeeds-ui:$rootProject.newsfeedsUIVersion"
+
+    // 定位 sdk
+    compile 'com.amap.api:location:latest.integration'
+
+    // 微信分享
+    compile 'com.tencent.mm.opensdk:wechat-sdk-android-with-mta:1.0.2'
 }
 
 // 直接引用buildsrc的插件类
-//apply plugin: com.codeless.plugin.InjectPluginImpl
+apply plugin: com.codeless.plugin.InjectPluginImpl
 // 引用远程maven仓库的插件
-apply plugin: 'com.codeless'
+//apply plugin: 'com.codeless'
 codelessConfig {
     //this will determine the name of this plugin transform, no practical use.
     pluginName = 'myPluginTest'
@@ -56,5 +87,5 @@ codelessConfig {
     //structure is like ['butterknife.internal','com.a.c'], type is HashSet<String>.
     //You can also specify the name of the class;
     //example: ['com.xxx.xxx.BaseFragment']
-    targetPackages = []
+    targetPackages = ['com.netease.youliao.newsfeeds.ui']
 }

@@ -24,3 +24,10 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+ext{
+    supportLibraryVersion = '25.3.1'
+    systembartintVersion = "1.0.+"
+    newsfeedsDataVersion = "1.5.0"
+    newsfeedsUIVersion = "1.5.0"
+}
