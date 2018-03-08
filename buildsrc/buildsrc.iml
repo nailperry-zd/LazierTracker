@@ -89,8 +89,8 @@
     <orderEntry type="library" exported="" name="commons-io-2.4" level="project" />
     <orderEntry type="library" exported="" name="annotations-25.2.2" level="project" />
     <orderEntry type="library" exported="" name="guava-18.0" level="project" />
-    <orderEntry type="library" exported="" name="gradle-api-2.14.1" level="project" />
-    <orderEntry type="library" exported="" name="groovy-all-2.4.4" level="project" />
-    <orderEntry type="library" exported="" name="gradle-installation-beacon-2.14.1" level="project" />
+    <orderEntry type="library" exported="" name="gradle-api-3.3" level="project" />
+    <orderEntry type="library" exported="" name="groovy-all-2.4.7" level="project" />
+    <orderEntry type="library" exported="" name="gradle-installation-beacon-3.3" level="project" />
   </component>
 </module>

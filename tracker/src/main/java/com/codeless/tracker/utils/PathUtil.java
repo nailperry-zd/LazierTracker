@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by zhangdan on 2018/3/5.
@@ -306,5 +308,26 @@ public class PathUtil {
 
     public static String getMainWindowType() {
         return "/MainWindow";
+    }
+
+    /**
+     * 当条件满足时，将返回true，否则返回false
+     *
+     * @param currViewPath
+     * @param viewPath
+     * @return
+     */
+    public static boolean match(String currViewPath, String viewPath) {
+        if (TextUtils.isEmpty(currViewPath) || TextUtils.isEmpty(viewPath)) {
+            return false;
+        }
+        try {
+            Pattern pattern = Pattern.compile(viewPath);
+            Matcher matcher = pattern.matcher(currViewPath);
+            return matcher.matches();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

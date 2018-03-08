@@ -60,7 +60,7 @@ public class PluginAgent {
                     for (int i = 0; i < nodesArr.size(); i++) {
                         JSONObject nodeObj = nodesArr.getJSONObject(i);
                         String viewPath = nodeObj.getString(ConfigConstants.VIEWPATH);
-                        if (currViewPath.equals(viewPath)) {
+                        if (currViewPath.equals(viewPath) || PathUtil.match(currViewPath, viewPath)) {
                             // 按照路径dataPath搜集数据
                             Object businessData = PathUtil.getDataObj(view, nodeObj);
                             Map<String, Object> attributes = new HashMap<>();
